@@ -1,0 +1,1409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#060911">
+<link rel="manifest" href="/manifest.json">
+<title>TARE // Precision Telemetry &amp; Anomaly Reconstruction Suite</title>
+<style>
+  :root {
+    --bg-base: #060911;
+    --bg-surface: #0b101d;
+    --bg-elevated: #0f172a;
+    --bg-glass: rgba(11, 16, 29, 0.92);
+    --border-subtle: #1b263b;
+    --border-focus: #2c3e5e;
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --cyan: #06b6d4;
+    --cyan-glow: rgba(6, 182, 212, 0.18);
+    --teal: #10b981;
+    --teal-glow: rgba(16, 185, 129, 0.16);
+    --blue: #3b82f6;
+    --indigo: #6366f1;
+    --amber: #f59e0b;
+    --amber-glow: rgba(245, 158, 11, 0.18);
+    --rose: #f43f5e;
+    --rose-glow: rgba(244, 63, 94, 0.2);
+    --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --font-mono: "JetBrains Mono", "SFMono-Regular", "Cascadia Mono", "Consolas", monospace;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    background-color: var(--bg-base);
+    background-image:
+      radial-gradient(rgba(27, 38, 59, 0.45) 1px, transparent 1px),
+      radial-gradient(circle at 12% 0%, rgba(6, 182, 212, 0.08), transparent 40%),
+      radial-gradient(circle at 88% 0%, rgba(59, 130, 246, 0.08), transparent 40%);
+    background-size: 24px 24px, 100% 100%, 100% 100%;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Top Command Header */
+  header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 1.4rem;
+    border-bottom: 1px solid var(--border-subtle);
+    background: rgba(6, 9, 17, 0.92);
+    backdrop-filter: blur(12px);
+    position: sticky;
+    top: 0;
+    z-index: 40;
+  }
+  .brand-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .brand-badge {
+    background: linear-gradient(135deg, var(--cyan), var(--blue));
+    color: #030712;
+    font-family: var(--font-mono);
+    font-weight: 800;
+    font-size: 0.72rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    letter-spacing: 0.08em;
+  }
+  header h1 {
+    margin: 0;
+    font-size: 1.02rem;
+    letter-spacing: -0.01em;
+    font-weight: 700;
+  }
+  header .sub {
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    font-family: var(--font-mono);
+    margin-top: 0.15rem;
+  }
+  .status-strip {
+    display: flex;
+    gap: 0.55rem;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .status-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    padding: 0.26rem 0.6rem;
+    border-radius: 6px;
+    font-size: 0.72rem;
+    font-family: var(--font-mono);
+    color: var(--text-secondary);
+  }
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.14rem 0.48rem;
+    border-radius: 4px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    letter-spacing: 0.04em;
+  }
+  .pill.up { background: var(--teal-glow); color: var(--teal); border: 1px solid rgba(16, 185, 129, 0.35); }
+  .pill.down { background: var(--rose-glow); color: var(--rose); border: 1px solid rgba(244, 63, 94, 0.4); }
+  .pill.warn { background: var(--amber-glow); color: var(--amber); border: 1px solid rgba(245, 158, 11, 0.4); }
+  .pill.info { background: var(--cyan-glow); color: var(--cyan); border: 1px solid rgba(6, 182, 212, 0.4); }
+
+  /* Scenario Toolbar */
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.38rem;
+    padding: 0.6rem 1.4rem;
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border-subtle);
+    align-items: center;
+  }
+  .toolbar-label {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    margin-right: 0.35rem;
+    font-weight: 700;
+    font-family: var(--font-mono);
+  }
+  button {
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    border: 1px solid var(--border-subtle);
+    border-radius: 5px;
+    padding: 0.34rem 0.62rem;
+    font-size: 0.74rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.14s ease;
+    font-family: var(--font-sans);
+  }
+  button:hover {
+    background: #17233d;
+    border-color: var(--cyan);
+    transform: translateY(-1px);
+  }
+  button.btn-danger {
+    background: rgba(244, 63, 94, 0.12);
+    border-color: rgba(244, 63, 94, 0.45);
+    color: #fda4af;
+  }
+  button.btn-danger:hover { background: rgba(244, 63, 94, 0.22); border-color: var(--rose); }
+  button.btn-warn {
+    background: rgba(245, 158, 11, 0.12);
+    border-color: rgba(245, 158, 11, 0.45);
+    color: #fcd34d;
+  }
+  button.btn-warn:hover { background: rgba(245, 158, 11, 0.22); border-color: var(--amber); }
+  button.btn-accent {
+    background: rgba(6, 182, 212, 0.14);
+    border-color: rgba(6, 182, 212, 0.5);
+    color: #67e8f9;
+  }
+
+  /* Executive KPI Delta Ribbon */
+  .kpi-ribbon {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 0.7rem;
+    padding: 0.85rem 1.4rem 0;
+  }
+  @media (max-width: 1200px) {
+    .kpi-ribbon { grid-template-columns: repeat(3, 1fr); }
+  }
+  .kpi-card {
+    background: var(--bg-glass);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    padding: 0.65rem 0.8rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .kpi-card::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--cyan), transparent);
+  }
+  .kpi-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+  .kpi-main {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-top: 0.28rem;
+  }
+  .kpi-val {
+    font-family: var(--font-mono);
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+  .kpi-unit {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    font-weight: 500;
+    margin-left: 0.2rem;
+  }
+  .delta-badge {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 0.1rem 0.38rem;
+    border-radius: 4px;
+  }
+  .delta-pos { background: rgba(6, 182, 212, 0.14); color: var(--cyan); }
+  .delta-neg { background: rgba(245, 158, 11, 0.15); color: var(--amber); }
+  .delta-crit { background: rgba(244, 63, 94, 0.2); color: var(--rose); }
+  .delta-ok { background: rgba(16, 185, 129, 0.14); color: var(--teal); }
+  .kpi-bar {
+    height: 4px;
+    background: #141e33;
+    border-radius: 2px;
+    margin-top: 0.45rem;
+    overflow: hidden;
+  }
+  .kpi-bar-fill {
+    height: 100%;
+    width: 0%;
+    background: var(--cyan);
+    transition: width 0.18s ease, background-color 0.18s ease;
+  }
+  .kpi-sub {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    margin-top: 0.28rem;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  /* Main 12-Col Grid */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 0.85rem;
+    padding: 0.85rem 1.4rem 2rem;
+  }
+  .col-4 { grid-column: span 4; }
+  .col-5 { grid-column: span 5; }
+  .col-6 { grid-column: span 6; }
+  .col-7 { grid-column: span 7; }
+  .col-8 { grid-column: span 8; }
+  .col-12 { grid-column: span 12; }
+  @media (max-width: 1150px) {
+    .col-4, .col-5, .col-6, .col-7, .col-8 { grid-column: span 12; }
+  }
+
+  section {
+    background: var(--bg-glass);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    padding: 0.9rem;
+    display: flex;
+    flex-direction: column;
+  }
+  section h2 {
+    margin: 0 0 0.65rem;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-secondary);
+    font-weight: 700;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(27, 38, 59, 0.7);
+    padding-bottom: 0.45rem;
+  }
+
+  .chart-wrap {
+    position: relative;
+    background: #050811;
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    padding: 0.35rem;
+  }
+  .chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    color: var(--text-muted);
+    padding: 0.1rem 0.35rem 0.3rem;
+  }
+  .legend-inline {
+    display: flex;
+    gap: 0.7rem;
+    align-items: center;
+  }
+  .leg-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    margin-right: 4px;
+  }
+  canvas {
+    width: 100%;
+    display: block;
+    border-radius: 4px;
+  }
+
+  /* State machine pipeline */
+  .sm-pipeline {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.45rem;
+    margin-bottom: 0.6rem;
+  }
+  .sm-step {
+    text-align: center;
+    padding: 0.5rem 0.35rem;
+    border-radius: 6px;
+    border: 1px solid var(--border-subtle);
+    background: #070b14;
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    transition: all 0.2s ease;
+  }
+  .sm-step.active-NORMAL {
+    border-color: var(--teal);
+    background: var(--teal-glow);
+    color: var(--teal);
+    box-shadow: 0 0 12px rgba(16, 185, 129, 0.2);
+  }
+  .sm-step.active-SUSPECTED {
+    border-color: var(--amber);
+    background: var(--amber-glow);
+    color: var(--amber);
+    animation: pulseWarn 0.8s infinite alternate;
+  }
+  .sm-step.active-CONFIRMED, .sm-step.active-LOCKDOWN {
+    border-color: var(--rose);
+    background: var(--rose-glow);
+    color: var(--rose);
+    animation: pulseDanger 0.55s infinite alternate;
+  }
+  @keyframes pulseWarn {
+    from { box-shadow: 0 0 4px rgba(245, 158, 11, 0.2); }
+    to   { box-shadow: 0 0 16px rgba(245, 158, 11, 0.65); }
+  }
+  @keyframes pulseDanger {
+    from { box-shadow: 0 0 4px rgba(244, 63, 94, 0.3); }
+    to   { box-shadow: 0 0 18px rgba(244, 63, 94, 0.85); }
+  }
+
+  /* Virtual Relays */
+  .relay-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+    margin-bottom: 0.65rem;
+  }
+  .relay-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.55rem 0.7rem;
+    border-radius: 6px;
+    border: 1px solid var(--border-subtle);
+    background: #070b14;
+    font-size: 0.76rem;
+  }
+  .relay-box.on-danger {
+    border-color: var(--rose);
+    background: var(--rose-glow);
+    animation: pulseDanger 0.5s infinite alternate;
+  }
+  .relay-box.on-warn {
+    border-color: var(--amber);
+    background: var(--amber-glow);
+    animation: pulseWarn 0.5s infinite alternate;
+  }
+  .relay-led {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: #24324d;
+    display: inline-block;
+    flex-shrink: 0;
+  }
+  .relay-led.on-red { background: var(--rose); box-shadow: 0 0 10px var(--rose); }
+  .relay-led.on-amber { background: var(--amber); box-shadow: 0 0 10px var(--amber); }
+  .relay-led.on-green { background: var(--teal); box-shadow: 0 0 8px var(--teal); }
+
+  /* Ring buffer cells */
+  .ring-cells {
+    display: grid;
+    grid-template-columns: repeat(16, 1fr);
+    gap: 3px;
+    margin: 0.45rem 0;
+  }
+  .ring-cell {
+    height: 17px;
+    border-radius: 2px;
+    background: #0e1628;
+    border: 1px solid #1b2845;
+    font-size: 0.56rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    color: var(--text-muted);
+  }
+  .ring-cell.filled { background: rgba(6, 182, 212, 0.2); border-color: rgba(6, 182, 212, 0.5); color: var(--text-primary); }
+  .ring-cell.is-head { background: rgba(245, 158, 11, 0.4); border-color: var(--amber); color: #fff; font-weight: 700; }
+  .ring-cell.is-tail { background: rgba(244, 63, 94, 0.45); border-color: var(--rose); color: #fff; font-weight: 700; }
+
+  .reason-banner {
+    font-family: var(--font-mono);
+    font-size: 0.73rem;
+    padding: 0.45rem 0.6rem;
+    border-radius: 5px;
+    background: #070b14;
+    border: 1px solid var(--border-subtle);
+    border-left: 3px solid var(--cyan);
+    word-break: break-word;
+  }
+
+  /* Diff Comparison Matrix Table */
+  .diff-matrix {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.45rem;
+    margin-top: 0.5rem;
+  }
+  .diff-cell {
+    background: #070b14;
+    border: 1px solid var(--border-subtle);
+    border-radius: 5px;
+    padding: 0.4rem 0.5rem;
+    font-family: var(--font-mono);
+  }
+  .diff-cell .d-lbl {
+    font-size: 0.62rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+  }
+  .diff-cell .d-val {
+    font-size: 0.84rem;
+    font-weight: 700;
+    margin-top: 0.12rem;
+  }
+  .diff-cell .d-ref {
+    font-size: 0.62rem;
+    color: var(--text-secondary);
+    margin-top: 0.08rem;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.74rem;
+  }
+  th, td {
+    text-align: left;
+    padding: 0.34rem 0.35rem;
+    border-bottom: 1px solid var(--border-subtle);
+    font-family: var(--font-mono);
+  }
+  th {
+    color: var(--text-muted);
+    font-weight: 600;
+    font-family: var(--font-sans);
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .sev-CRITICAL { color: var(--rose); font-weight: 700; }
+  .sev-HIGH { color: var(--amber); font-weight: 700; }
+  .sev-MEDIUM { color: var(--cyan); }
+  .keypad-row {
+    display: flex;
+    gap: 0.35rem;
+    margin-top: 0.45rem;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  input[type="text"], input[type="password"] {
+    background: #060a14;
+    border: 1px solid var(--border-subtle);
+    color: var(--text-primary);
+    padding: 0.34rem 0.55rem;
+    border-radius: 5px;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    width: 96px;
+  }
+  input[type="range"] {
+    width: 100%;
+    accent-color: var(--cyan);
+  }
+</style>
+</head>
+<body>
+  <header>
+    <div class="brand-row">
+      <span class="brand-badge">TARE // MX-PRO</span>
+      <div>
+        <h1>Telemetry &amp; Anomaly Reconstruction Engine</h1>
+        <div class="sub">250 Hz IMU Stream · O(1) Welford Z-Score Gate · Differential (Δ) Forensics · Malloc-Free Edge Core</div>
+      </div>
+    </div>
+    <div class="status-strip">
+      <div class="status-chip">STREAM <span id="streamBadge" class="pill up">SSE 250Hz</span></div>
+      <div class="status-chip">UPLINK <span id="netBadge" class="pill up">4G LTE</span></div>
+      <div class="status-chip">SECURITY <span id="armBadge" class="pill up">DISARMED</span></div>
+      <div class="status-chip">LAST EVENT <span id="lastAlertBadge" class="pill info">NONE</span></div>
+      <div class="status-chip">UPTIME <strong id="simTime" style="color:var(--text-primary)">0.00s</strong></div>
+    </div>
+  </header>
+
+  <!-- Scenario & Hardware-Free Control Bar -->
+  <div class="toolbar">
+    <span class="toolbar-label">Inject Scenario //</span>
+    <button onclick="injectScenario('cruise')">Highway Cruise</button>
+    <button class="btn-warn" onclick="injectScenario('pothole')">Pothole (12ms Impulse)</button>
+    <button class="btn-warn" onclick="injectScenario('hard_brake')">Hard Brake</button>
+    <button class="btn-danger" onclick="injectScenario('collision')">Collision (6.5G)</button>
+    <button class="btn-danger" onclick="injectScenario('rollover')">Rollover (&gt;60ms Tilt)</button>
+    <button class="btn-warn" onclick="injectScenario('overheat')">Engine Overheat</button>
+    <button class="btn-danger" onclick="injectScenario('theft')">Theft Tamper</button>
+    <button onclick="injectScenario('gps_loss')">GNSS Tunnel Loss</button>
+    <button onclick="injectScenario('sensor_fault')">Sensor Fault</button>
+    <span style="margin-left:auto;display:flex;gap:0.38rem;flex-wrap:wrap">
+      <button class="btn-accent" onclick="sendControl('autodemo')">Auto-Demo Loop</button>
+      <button onclick="sendControl('network')">Toggle 4G Link</button>
+      <button onclick="sendControl('arm')">Arm / Disarm</button>
+      <button onclick="window.location='/api/blackbox.csv'">Export CSV</button>
+    </span>
+  </div>
+
+  <!-- Executive KPI Ribbon with Real-Time Differential (Δ) Readouts -->
+  <div class="kpi-ribbon">
+    <div class="kpi-card">
+      <div class="kpi-top"><span>Velocity (v)</span><span id="deltaSpeed" class="delta-badge delta-ok">Δ 0.0 km/h</span></div>
+      <div class="kpi-main">
+        <div><span class="kpi-val" id="valSpeed">0.0</span><span class="kpi-unit">km/h</span></div>
+      </div>
+      <div class="kpi-bar"><div id="barSpeed" class="kpi-bar-fill" style="width:45%"></div></div>
+      <div class="kpi-sub"><span>Baseline: <span id="refSpeed">60.0</span></span><span>Cut Gate: ≤3.0 km/h</span></div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-top"><span>Linear |a| (G-Removed)</span><span id="deltaLinA" class="delta-badge delta-pos">Δ +0.0 m/s²</span></div>
+      <div class="kpi-main">
+        <div><span class="kpi-val" id="valLinA">0.12</span><span class="kpi-unit">m/s²</span></div>
+      </div>
+      <div class="kpi-bar"><div id="barLinA" class="kpi-bar-fill" style="width:8%"></div></div>
+      <div class="kpi-sub"><span>Peak: <span id="peakLinA">0.0</span> m/s²</span><span>Crash Gate: 31.4 m/s²</span></div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-top"><span>Statistical Z-Score</span><span id="deltaZ" class="delta-badge delta-ok">Δ +0.00σ</span></div>
+      <div class="kpi-main">
+        <div><span class="kpi-val" id="detZ">0.00</span><span class="kpi-unit">σ</span></div>
+      </div>
+      <div class="kpi-bar"><div id="barZ" class="kpi-bar-fill" style="width:5%"></div></div>
+      <div class="kpi-sub"><span>μ=<span id="detMean">9.81</span></span><span>σ²=<span id="detVar">0.050</span> (Gate 3.0σ)</span></div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-top"><span>IMU 3-Axis Vector</span><span id="deltaGyro" class="delta-badge delta-ok">Tilt 0ms</span></div>
+      <div class="kpi-main">
+        <div><span class="kpi-val" id="valAccel" style="font-size:0.96rem">0.0 / 0.0 / 9.8</span></div>
+      </div>
+      <div class="kpi-bar"><div id="barTilt" class="kpi-bar-fill" style="width:5%"></div></div>
+      <div class="kpi-sub"><span>Gyro: <span id="valGyro">0/0/0</span> °/s</span><span>Rollover ≥60ms</span></div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-top"><span>Thermal &amp; Power</span><span id="deltaTemp" class="delta-badge delta-ok">Δ +0.0°C</span></div>
+      <div class="kpi-main">
+        <div><span class="kpi-val" id="valTempBatt" style="font-size:1.05rem">85.0°C · 78%</span></div>
+      </div>
+      <div class="kpi-bar"><div id="barTemp" class="kpi-bar-fill" style="width:65%"></div></div>
+      <div class="kpi-sub"><span>Hysteresis: 98°C–105°C</span><span>ADC1_CH6 LM35</span></div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-top"><span>Detector Latency</span><span class="delta-badge delta-pos">O(1) Window</span></div>
+      <div class="kpi-main">
+        <div><span class="kpi-val">424</span><span class="kpi-unit">ns/pkt</span></div>
+      </div>
+      <div class="kpi-bar"><div class="kpi-bar-fill" style="width:12%;background:var(--teal)"></div></div>
+      <div class="kpi-sub"><span>Budget: 4,000,000 ns</span><span>CPU Load: 0.011%</span></div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <!-- 1. Multi-Channel High-Rate Oscilloscope + Differential (Δ) Signal Graph -->
+    <section class="col-7">
+      <h2>
+        <span>01 // High-Rate IMU Oscilloscope &amp; Real-Time Differential (Δ) Stream</span>
+        <span style="font-family:var(--font-mono);font-size:0.68rem;color:var(--cyan)">N=16 Window · 250 Hz Sampling</span>
+      </h2>
+
+      <!-- Graph A: 3-Axis Accel + Threshold Envelope -->
+      <div class="chart-wrap" style="margin-bottom:0.6rem">
+        <div class="chart-header">
+          <span>CH1: 3-AXIS ACCELEROMETER (m/s²) vs. 3.2G COLLISION GATE</span>
+          <div class="legend-inline">
+            <span><i class="leg-dot" style="background:#06b6d4"></i>Ax (Longitudinal)</span>
+            <span><i class="leg-dot" style="background:#3b82f6"></i>Ay (Lateral)</span>
+            <span><i class="leg-dot" style="background:#f59e0b"></i>Az (Vertical)</span>
+            <span><i class="leg-dot" style="background:#f43f5e"></i>±31.4 m/s² Gate</span>
+          </div>
+        </div>
+        <canvas id="accelCanvas" width="760" height="165"></canvas>
+      </div>
+
+      <!-- Graph B: Z-Score (σ) & Frame-to-Frame Differential (Δ|a| & Δv) -->
+      <div class="chart-wrap">
+        <div class="chart-header">
+          <span>CH2: STATISTICAL Z-SCORE (σ) &amp; INSTANTANEOUS DIFFERENTIAL (Δ|a| = |a| − μ)</span>
+          <div class="legend-inline">
+            <span><i class="leg-dot" style="background:#10b981"></i>Z-Score (σ)</span>
+            <span><i class="leg-dot" style="background:#a855f7"></i>Diff Δ|a| (m/s²)</span>
+            <span><i class="leg-dot" style="background:#f43f5e"></i>3.0σ Anomaly Gate</span>
+          </div>
+        </div>
+        <canvas id="diffCanvas" width="760" height="135"></canvas>
+      </div>
+
+      <div id="detReasonBanner" class="reason-banner" style="margin-top:0.55rem">
+        NOMINAL: waiting for high-rate IMU stream
+      </div>
+    </section>
+
+    <!-- 2. Safe Relay State Machine & Hardware Actuators -->
+    <section class="col-5">
+      <h2>
+        <span>02 // Safe Relay State Machine &amp; Actuators</span>
+        <span style="font-family:var(--font-mono);font-size:0.68rem;color:var(--text-muted)">PIN / RFID: <code>1234</code></span>
+      </h2>
+      <div class="sm-pipeline">
+        <div id="smNORMAL" class="sm-step active-NORMAL">1. NORMAL</div>
+        <div id="smSUSPECTED" class="sm-step">2. SUSPECTED</div>
+        <div id="smCONFIRMED" class="sm-step">3. CONFIRMED</div>
+        <div id="smLOCKDOWN" class="sm-step">4. LOCKDOWN</div>
+      </div>
+      <div id="smStatusBanner" class="reason-banner" style="margin-bottom:0.6rem">
+        NORMAL: all systems nominal
+      </div>
+
+      <div class="relay-grid">
+        <div id="boxEngine" class="relay-box">
+          <span><strong>GPIO 25 · Engine Cut-Off</strong><br><small id="txtEngine" style="color:var(--text-muted)">NC Relay: RUN ALLOWED</small></span>
+          <span id="ledEngine" class="relay-led on-green"></span>
+        </div>
+        <div id="boxSiren" class="relay-box">
+          <span><strong>GPIO 27 · Alarm Siren</strong><br><small id="txtSiren" style="color:var(--text-muted)">NO Relay: SILENT</small></span>
+          <span id="ledSiren" class="relay-led"></span>
+        </div>
+        <div id="boxLights" class="relay-box">
+          <span><strong>GPIO 26 · Hazard Lights</strong><br><small id="txtLights" style="color:var(--text-muted)">NO Relay: OFF</small></span>
+          <span id="ledLights" class="relay-led"></span>
+        </div>
+        <div id="boxLock" class="relay-box">
+          <span><strong>GPIO 14 · Door Locks</strong><br><small id="txtLock" style="color:var(--text-muted)">FAIL-SAFE: UNLOCKED</small></span>
+          <span id="ledLock" class="relay-led on-green"></span>
+        </div>
+      </div>
+
+      <!-- On-Screen PIN / RFID Override Keypad -->
+      <div class="keypad-row" style="margin-bottom:0.65rem">
+        <input type="password" id="pinInput" value="1234" placeholder="PIN / RFID">
+        <button class="btn-accent" onclick="submitPinOverride()">Verify PIN / RFID Override</button>
+        <button onclick="keypadAppend('1')">1</button>
+        <button onclick="keypadAppend('2')">2</button>
+        <button onclick="keypadAppend('3')">3</button>
+        <button onclick="keypadAppend('4')">4</button>
+        <button onclick="document.getElementById('pinInput').value=''">CLR</button>
+      </div>
+
+      <!-- Circular Queue Ring Buffer Visualizer inside right column -->
+      <h2 style="margin-top:0.2rem">
+        <span>03 // Static Ring Buffer Memory Map (O(1) Black-Box)</span>
+        <span id="ringStats" style="font-family:var(--font-mono);color:var(--cyan)">0/128 pkts</span>
+      </h2>
+      <div style="font-size:0.68rem;color:var(--text-muted);display:flex;justify-content:space-between">
+        <span>Amber = <code>head</code> (oldest) · Red = <code>tail</code> (write cursor)</span>
+        <span>Overwrites: <strong id="valOverwrites" style="color:var(--text-primary)">0</strong></span>
+      </div>
+      <div id="ringGrid" class="ring-cells"></div>
+    </section>
+
+    <!-- 3. Black-Box Forensic Timeline Scrubber + Frame-by-Frame Differential Inspector -->
+    <section class="col-7">
+      <h2>
+        <span>04 // Black-Box Forensic Reconstruction &amp; Frame Diff Inspector</span>
+        <label style="cursor:pointer;color:var(--cyan);font-family:var(--font-mono);font-size:0.68rem;text-transform:none">
+          <input type="checkbox" id="freezeScrub"> Freeze Buffer for Inspection
+        </label>
+      </h2>
+
+      <!-- Snapshot Dual-Axis Replay Graph (Speed vs G-Force across all 128 frames) -->
+      <div class="chart-wrap" style="margin-bottom:0.55rem">
+        <div class="chart-header">
+          <span>FORENSIC BUFFER PROFILE (LAST <span id="snapCount">0</span> FRAMES) — SCRUBBER CURSOR &amp; DELTA ENVELOPE</span>
+          <div class="legend-inline">
+            <span><i class="leg-dot" style="background:#06b6d4"></i>Speed (km/h)</span>
+            <span><i class="leg-dot" style="background:#f43f5e"></i>Total |a| (m/s²)</span>
+            <span><i class="leg-dot" style="background:#f59e0b"></i>Selected Frame Cursor</span>
+          </div>
+        </div>
+        <canvas id="scrubCanvas" width="760" height="130"></canvas>
+      </div>
+
+      <input type="range" id="scrubSlider" min="0" max="0" value="0" oninput="renderScrubFrame()">
+      <div id="scrubReadout" style="font-family:var(--font-mono);font-size:0.72rem;color:var(--text-secondary);margin-top:0.25rem">
+        Move slider to inspect pre-crash telemetry frames and compute differential against pre-event baseline...
+      </div>
+
+      <!-- Frame Differential (Δ) Comparison Matrix: Selected Frame vs Frame #0 Baseline -->
+      <div class="diff-matrix">
+        <div class="diff-cell">
+          <div class="d-lbl">Δ Velocity (vs t₀)</div>
+          <div class="d-val" id="scrubDiffSpd" style="color:var(--cyan)">0.0 km/h</div>
+          <div class="d-ref" id="scrubRefSpd">t₀: 0.0 → cur: 0.0</div>
+        </div>
+        <div class="diff-cell">
+          <div class="d-lbl">Δ Accel |a| (vs t₀)</div>
+          <div class="d-val" id="scrubDiffAcc" style="color:var(--rose)">+0.0 m/s²</div>
+          <div class="d-ref" id="scrubRefAcc">t₀: 9.8 → cur: 9.8</div>
+        </div>
+        <div class="diff-cell">
+          <div class="d-lbl">Δ Gyro Pitch/Roll</div>
+          <div class="d-val" id="scrubDiffGyro" style="color:var(--amber)">0.0 °/s</div>
+          <div class="d-ref" id="scrubRefGyro">gx/gy peak delta</div>
+        </div>
+        <div class="diff-cell">
+          <div class="d-lbl">Δ Engine Temp</div>
+          <div class="d-val" id="scrubDiffTemp" style="color:var(--teal)">+0.0 °C</div>
+          <div class="d-ref" id="scrubRefTemp">t₀: 85.0°C → cur: 85.0°C</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. Virtual GNSS Trajectory Map & Emergency Hospital Dispatch -->
+    <section class="col-5">
+      <h2>
+        <span>05 // GNSS Trajectory &amp; Trauma Center Dispatch Vector</span>
+        <span id="gpsFixBadge" class="pill up">GNSS 3D FIX</span>
+      </h2>
+      <div class="chart-wrap">
+        <div class="chart-header">
+          <span>LIVE COORDINATE PROJECTION (WGS84)</span>
+          <span id="gpsCoordText">28.6139°N, 77.2090°E</span>
+        </div>
+        <canvas id="gpsCanvas" width="520" height="215"></canvas>
+      </div>
+    </section>
+
+    <!-- 5. Virtual SIM7670C Modem, LoRa & Severity-Ordered Outbox Linked List -->
+    <section class="col-6">
+      <h2>
+        <span>06 // SIM7670C 4G+GNSS Modem, LoRa 433MHz &amp; Priority Outbox</span>
+        <span id="flashWearStats" style="font-family:var(--font-mono);font-size:0.68rem;color:var(--cyan)">Batched Flash Writes: 0</span>
+      </h2>
+      <div class="diff-matrix" style="margin-top:0;margin-bottom:0.55rem">
+        <div class="diff-cell">
+          <div class="d-lbl">4G RSSI</div>
+          <div class="d-val" id="modemRssi">-67 dBm</div>
+          <div class="d-ref">SIM7670C UART2</div>
+        </div>
+        <div class="diff-cell">
+          <div class="d-lbl">HTTP TX / ACK</div>
+          <div class="d-val" id="pubStats">0 / 0</div>
+          <div class="d-ref">Exp. Backoff</div>
+        </div>
+        <div class="diff-cell">
+          <div class="d-lbl">LoRa SOS Packets</div>
+          <div class="d-val" id="loraSent" style="color:var(--amber)">0</div>
+          <div class="d-ref">Fallback Link</div>
+        </div>
+        <div class="diff-cell">
+          <div class="d-lbl">Static Pool Queue</div>
+          <div class="d-val" id="outboxLen" style="color:var(--cyan)">0 / 64</div>
+          <div class="d-ref">O(N) Severity List</div>
+        </div>
+      </div>
+      <div class="reason-banner" style="margin-bottom:0.55rem;border-left-color:var(--blue)">
+        <div><strong>UART2 AT:</strong> <span id="atCmdText">AT+CGATT=1</span> &rarr; <span id="atRespText" style="color:var(--teal)">OK</span></div>
+        <div style="margin-top:0.2rem"><strong>LoRa 433MHz:</strong> <span id="loraPayloadText" style="color:var(--amber)">IDLE</span></div>
+      </div>
+      <table>
+        <thead>
+          <tr><th>ID</th><th>Event Type</th><th>Severity</th><th>GNSS Fix</th><th>Retries</th><th>Backoff</th></tr>
+        </thead>
+        <tbody id="outboxTable"></tbody>
+      </table>
+    </section>
+
+    <!-- 6. Mock Cloud Backend, HMAC-SHA256 Security & Relay Event Log -->
+    <section class="col-6">
+      <h2>
+        <span>07 // Cloud Command Security (HMAC-SHA256 + 64-Bit Nonce)</span>
+        <span id="secCounters" class="pill up">Verified: 0 · Blocked: 0</span>
+      </h2>
+      <div style="display:flex;gap:0.35rem;flex-wrap:wrap;margin-bottom:0.5rem">
+        <button class="btn-accent" onclick="sendCloudCmd('DISARM','valid')">Signed DISARM</button>
+        <button class="btn-danger" onclick="sendCloudCmd('LOCKDOWN','valid')">Signed LOCKDOWN</button>
+        <button onclick="sendCloudCmd('ARM','valid')">Signed ARM</button>
+        <button class="btn-warn" onclick="sendCloudCmd('DISARM','replay')">Inject Replay Attack</button>
+        <button class="btn-warn" onclick="sendCloudCmd('DISARM','tamper')">Inject Tampered HMAC</button>
+        <button class="btn-warn" onclick="sendCloudCmd('UNLOCK','valid')">Attempt Bare UNLOCK</button>
+      </div>
+      <div id="secAuditBanner" class="reason-banner" style="border-left-color:var(--teal);margin-bottom:0.65rem">
+        SEC_INIT: HMAC-SHA256 + 64-bit Nonce Anti-Replay Ready
+      </div>
+
+      <h2><span>08 // Black-Box Relay Actuation Audit Trail</span></h2>
+      <table>
+        <thead>
+          <tr><th>Time (s)</th><th>Actuator</th><th>State</th><th>Safety State Machine Reason</th></tr>
+        </thead>
+        <tbody id="relayLogTable"></tbody>
+      </table>
+    </section>
+  </div>
+
+<script>
+(function () {
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("/sw.js").catch(function () {});
+  }
+
+  var accelCanvas = document.getElementById("accelCanvas");
+  var accelCtx = accelCanvas.getContext("2d");
+  var diffCanvas = document.getElementById("diffCanvas");
+  var diffCtx = diffCanvas.getContext("2d");
+  var scrubCanvas = document.getElementById("scrubCanvas");
+  var scrubCtx = scrubCanvas.getContext("2d");
+  var gpsCanvas = document.getElementById("gpsCanvas");
+  var gpsCtx = gpsCanvas.getContext("2d");
+
+  var gpsTrail = [];
+  var latestSnapshot = [];
+  var zHistory = [];
+  var diffAHistory = [];
+  var peakLinA = 0.0;
+  var prevSpeed = null;
+  var prevTemp = null;
+  var HOSPITAL = { name: "AIIMS Trauma Center", lat: 28.6152, lon: 77.2102 };
+
+  function $(id) { return document.getElementById(id); }
+
+  /* Build 32 visual ring-buffer slots */
+  var ringGrid = $("ringGrid");
+  for (var c = 0; c < 32; c++) {
+    var div = document.createElement("div");
+    div.className = "ring-cell";
+    div.textContent = c;
+    ringGrid.appendChild(div);
+  }
+
+  window.injectScenario = function (sc) {
+    fetch("/api/control?action=inject&scenario=" + encodeURIComponent(sc), { method: "POST" });
+  };
+
+  window.sendControl = function (act) {
+    fetch("/api/control?action=" + encodeURIComponent(act), { method: "POST" });
+  };
+
+  window.keypadAppend = function (digit) {
+    $("pinInput").value += digit;
+  };
+
+  window.submitPinOverride = function () {
+    var pin = $("pinInput").value;
+    fetch("/api/control?action=override&pin=" + encodeURIComponent(pin), { method: "POST" });
+  };
+
+  window.sendCloudCmd = function (cmd, mode) {
+    var pin = $("pinInput").value || "1234";
+    fetch("/api/cloud/command?cmd=" + encodeURIComponent(cmd) +
+          "&pin=" + encodeURIComponent(pin) +
+          "&mode=" + encodeURIComponent(mode), { method: "POST" })
+      .then(function (r) { return r.json(); })
+      .then(function (res) {
+        if (res && res.audit) {
+          $("secAuditBanner").textContent = res.audit;
+          $("secAuditBanner").style.borderLeftColor = res.ok ? "#10b981" : "#f43f5e";
+        }
+      });
+  };
+
+  function drawGridWithLabels(ctx, w, h, yLabels) {
+    ctx.clearRect(0, 0, w, h);
+    ctx.strokeStyle = "#131c2e";
+    ctx.lineWidth = 1;
+    var rows = yLabels.length;
+    for (var r = 0; r < rows; r++) {
+      var y = 12 + (r / Math.max(rows - 1, 1)) * (h - 24);
+      ctx.beginPath();
+      ctx.moveTo(38, y);
+      ctx.lineTo(w - 6, y);
+      ctx.stroke();
+      ctx.fillStyle = "#64748b";
+      ctx.font = "10px monospace";
+      ctx.fillText(yLabels[r], 4, y + 3);
+    }
+    for (var x = 38; x < w; x += 60) {
+      ctx.beginPath();
+      ctx.moveTo(x, 8);
+      ctx.lineTo(x, h - 8);
+      ctx.stroke();
+    }
+  }
+
+  function drawAccelPlot(plot) {
+    var w = accelCanvas.width, h = accelCanvas.height;
+    drawGridWithLabels(accelCtx, w, h, ["+40", "+20", "  0", "-20", "-40"]);
+
+    var maxScale = 42.0;
+    function yMap(v) {
+      return (h / 2) - (v / maxScale) * (h / 2 - 12);
+    }
+
+    /* Draw ±31.4 m/s² (3.2G) collision threshold gates */
+    accelCtx.strokeStyle = "rgba(244, 63, 94, 0.45)";
+    accelCtx.setLineDash([5, 4]);
+    [31.4, -31.4].forEach(function (th) {
+      var ty = yMap(th);
+      accelCtx.beginPath();
+      accelCtx.moveTo(38, ty);
+      accelCtx.lineTo(w - 6, ty);
+      accelCtx.stroke();
+    });
+    accelCtx.setLineDash([]);
+
+    function series(arr, color, fillAlpha) {
+      if (!arr || !arr.length) return;
+      var n = arr.length;
+      accelCtx.strokeStyle = color;
+      accelCtx.lineWidth = 1.8;
+      accelCtx.beginPath();
+      for (var j = 0; j < n; j++) {
+        var x = 38 + (j / Math.max(n - 1, 1)) * (w - 46);
+        var y = yMap(arr[j]);
+        if (j === 0) accelCtx.moveTo(x, y); else accelCtx.lineTo(x, y);
+      }
+      accelCtx.stroke();
+      if (fillAlpha) {
+        accelCtx.lineTo(w - 8, yMap(0));
+        accelCtx.lineTo(38, yMap(0));
+        accelCtx.closePath();
+        accelCtx.fillStyle = fillAlpha;
+        accelCtx.fill();
+      }
+    }
+    series(plot.ax, "#06b6d4", "rgba(6, 182, 212, 0.08)");
+    series(plot.ay, "#3b82f6", null);
+    series(plot.az, "#f59e0b", null);
+  }
+
+  function drawDiffAndZPlot() {
+    var w = diffCanvas.width, h = diffCanvas.height;
+    drawGridWithLabels(diffCtx, w, h, ["+8σ", "+4σ", " 0σ", "-4σ"]);
+
+    function yMapZ(z) {
+      var clamped = Math.max(-4, Math.min(8, z));
+      return 12 + ((8 - clamped) / 12) * (h - 24);
+    }
+
+    /* 3.0σ Anomaly Gate Line */
+    var gateY = yMapZ(3.0);
+    diffCtx.strokeStyle = "rgba(244, 63, 94, 0.6)";
+    diffCtx.setLineDash([4, 4]);
+    diffCtx.beginPath();
+    diffCtx.moveTo(38, gateY);
+    diffCtx.lineTo(w - 6, gateY);
+    diffCtx.stroke();
+    diffCtx.setLineDash([]);
+
+    function plotHist(arr, color, scaleFactor) {
+      if (arr.length < 2) return;
+      diffCtx.strokeStyle = color;
+      diffCtx.lineWidth = 1.8;
+      diffCtx.beginPath();
+      for (var i = 0; i < arr.length; i++) {
+        var x = 38 + (i / Math.max(arr.length - 1, 1)) * (w - 46);
+        var y = yMapZ(arr[i] * scaleFactor);
+        if (i === 0) diffCtx.moveTo(x, y); else diffCtx.lineTo(x, y);
+      }
+      diffCtx.stroke();
+    }
+
+    plotHist(diffAHistory, "#a855f7", 0.25);
+    plotHist(zHistory, "#10b981", 1.0);
+  }
+
+  function drawScrubChart(selectedIdx) {
+    var w = scrubCanvas.width, h = scrubCanvas.height;
+    drawGridWithLabels(scrubCtx, w, h, ["120", " 80", " 40", "  0"]);
+    if (!latestSnapshot || latestSnapshot.length < 2) return;
+
+    var n = latestSnapshot.length;
+    /* Plot Speed (0..130 km/h) */
+    scrubCtx.strokeStyle = "#06b6d4";
+    scrubCtx.lineWidth = 1.7;
+    scrubCtx.beginPath();
+    for (var i = 0; i < n; i++) {
+      var x = 38 + (i / (n - 1)) * (w - 46);
+      var y = (h - 12) - (Math.min(130, latestSnapshot[i].spd) / 130) * (h - 24);
+      if (i === 0) scrubCtx.moveTo(x, y); else scrubCtx.lineTo(x, y);
+    }
+    scrubCtx.stroke();
+
+    /* Plot |a| magnitude (scaled x2 for visibility on 0..130 chart) */
+    scrubCtx.strokeStyle = "#f43f5e";
+    scrubCtx.lineWidth = 1.6;
+    scrubCtx.beginPath();
+    for (var j = 0; j < n; j++) {
+      var f = latestSnapshot[j];
+      var amag = Math.sqrt(f.ax * f.ax + f.ay * f.ay + f.az * f.az);
+      var x2 = 38 + (j / (n - 1)) * (w - 46);
+      var y2 = (h - 12) - (Math.min(130, amag * 2.0) / 130) * (h - 24);
+      if (j === 0) scrubCtx.moveTo(x2, y2); else scrubCtx.lineTo(x2, y2);
+    }
+    scrubCtx.stroke();
+
+    /* Selected scrubber cursor */
+    var cx = 38 + (selectedIdx / Math.max(n - 1, 1)) * (w - 46);
+    scrubCtx.strokeStyle = "#f59e0b";
+    scrubCtx.lineWidth = 1.5;
+    scrubCtx.beginPath();
+    scrubCtx.moveTo(cx, 6);
+    scrubCtx.lineTo(cx, h - 6);
+    scrubCtx.stroke();
+  }
+
+  window.renderScrubFrame = function () {
+    var slider = $("scrubSlider");
+    var idx = parseInt(slider.value, 10) || 0;
+    if (!latestSnapshot || !latestSnapshot.length || !latestSnapshot[idx]) return;
+    var f = latestSnapshot[idx];
+    var base = latestSnapshot[0];
+
+    var amag = Math.sqrt(f.ax * f.ax + f.ay * f.ay + f.az * f.az);
+    var baseAmag = Math.sqrt(base.ax * base.ax + base.ay * base.ay + base.az * base.az);
+    var dSpd = f.spd - base.spd;
+    var dAcc = amag - baseAmag;
+    var dGyro = Math.hypot(f.gx - base.gx, f.gy - base.gy);
+    var dTemp = f.temp - base.temp;
+
+    $("scrubReadout").innerHTML =
+      "Frame <strong>#" + (idx + 1) + "/" + latestSnapshot.length + "</strong> · " +
+      "t=" + f.t.toFixed(2) + "s · v=" + f.spd.toFixed(1) + " km/h · " +
+      "|a|=" + amag.toFixed(2) + " m/s² (" + f.ax.toFixed(1) + "," + f.ay.toFixed(1) + "," + f.az.toFixed(1) + ") · " +
+      "gyro=(" + f.gx.toFixed(1) + "," + f.gy.toFixed(1) + ") °/s";
+
+    $("scrubDiffSpd").textContent = (dSpd >= 0 ? "+" : "") + dSpd.toFixed(1) + " km/h";
+    $("scrubDiffSpd").style.color = dSpd < -10 ? "var(--rose)" : "var(--cyan)";
+    $("scrubRefSpd").textContent = "t₀: " + base.spd.toFixed(1) + " → cur: " + f.spd.toFixed(1);
+
+    $("scrubDiffAcc").textContent = (dAcc >= 0 ? "+" : "") + dAcc.toFixed(2) + " m/s²";
+    $("scrubDiffAcc").style.color = Math.abs(dAcc) > 15 ? "var(--rose)" : "var(--teal)";
+    $("scrubRefAcc").textContent = "t₀: " + baseAmag.toFixed(1) + " → cur: " + amag.toFixed(1);
+
+    $("scrubDiffGyro").textContent = (dGyro >= 0 ? "+" : "") + dGyro.toFixed(1) + " °/s";
+    $("scrubRefGyro").textContent = "gx:" + f.gx.toFixed(0) + "°/s gy:" + f.gy.toFixed(0) + "°/s";
+
+    $("scrubDiffTemp").textContent = (dTemp >= 0 ? "+" : "") + dTemp.toFixed(1) + " °C";
+    $("scrubRefTemp").textContent = "t₀: " + base.temp.toFixed(1) + "°C → cur: " + f.temp.toFixed(1) + "°C";
+
+    drawScrubChart(idx);
+  };
+
+  function drawGpsMap(gps) {
+    var w = gpsCanvas.width, h = gpsCanvas.height;
+    gpsCtx.clearRect(0, 0, w, h);
+
+    gpsCtx.strokeStyle = "#121c2e";
+    gpsCtx.lineWidth = 1;
+    for (var gx = 0; gx < w; gx += 45) {
+      gpsCtx.beginPath(); gpsCtx.moveTo(gx, 0); gpsCtx.lineTo(gx, h); gpsCtx.stroke();
+    }
+    for (var gy = 0; gy < h; gy += 35) {
+      gpsCtx.beginPath(); gpsCtx.moveTo(0, gy); gpsCtx.lineTo(w, gy); gpsCtx.stroke();
+    }
+
+    if (gps && gps.valid) {
+      gpsTrail.push({ lat: gps.lat, lon: gps.lon });
+      if (gpsTrail.length > 80) gpsTrail.shift();
+      $("gpsCoordText").textContent = gps.lat.toFixed(5) + "°N, " + gps.lon.toFixed(5) + "°E";
+    }
+
+    function toXY(lat, lon) {
+      var x = 45 + ((lon - 77.2085) / 0.0025) * (w - 90);
+      var y = h - 25 - ((lat - 28.6135) / 0.0025) * (h - 50);
+      return {
+        x: Math.max(18, Math.min(w - 18, x)),
+        y: Math.max(18, Math.min(h - 18, y))
+      };
+    }
+
+    if (gpsTrail.length > 1) {
+      gpsCtx.strokeStyle = "#06b6d4";
+      gpsCtx.lineWidth = 2;
+      gpsCtx.beginPath();
+      for (var i = 0; i < gpsTrail.length; i++) {
+        var pt = toXY(gpsTrail[i].lat, gpsTrail[i].lon);
+        if (i === 0) gpsCtx.moveTo(pt.x, pt.y); else gpsCtx.lineTo(pt.x, pt.y);
+      }
+      gpsCtx.stroke();
+    }
+
+    var hpt = toXY(HOSPITAL.lat, HOSPITAL.lon);
+    gpsCtx.fillStyle = "#10b981";
+    gpsCtx.beginPath();
+    gpsCtx.arc(hpt.x, hpt.y, 6, 0, Math.PI * 2);
+    gpsCtx.fill();
+    gpsCtx.fillStyle = "#f1f5f9";
+    gpsCtx.font = "10px monospace";
+    gpsCtx.fillText("EMS // " + HOSPITAL.name, hpt.x - 55, hpt.y - 10);
+
+    if (gps) {
+      var vpt = toXY(gps.lat, gps.lon);
+      gpsCtx.fillStyle = gps.valid ? "#3b82f6" : "#f59e0b";
+      gpsCtx.beginPath();
+      gpsCtx.arc(vpt.x, vpt.y, 6, 0, Math.PI * 2);
+      gpsCtx.fill();
+      gpsCtx.fillStyle = "#94a3b8";
+      gpsCtx.fillText("UNIT-01", vpt.x + 9, vpt.y + 4);
+
+      if (gps.has_crash) {
+        var cpt = toXY(gps.crash_lat, gps.crash_lon);
+        gpsCtx.strokeStyle = "#f43f5e";
+        gpsCtx.setLineDash([5, 4]);
+        gpsCtx.lineWidth = 2;
+        gpsCtx.beginPath();
+        gpsCtx.moveTo(cpt.x, cpt.y);
+        gpsCtx.lineTo(hpt.x, hpt.y);
+        gpsCtx.stroke();
+        gpsCtx.setLineDash([]);
+
+        gpsCtx.fillStyle = "#f43f5e";
+        gpsCtx.beginPath();
+        gpsCtx.arc(cpt.x, cpt.y, 7, 0, Math.PI * 2);
+        gpsCtx.fill();
+        gpsCtx.fillText("IMPACT VECTOR -> DISPATCH", cpt.x - 45, cpt.y + 18);
+      }
+    }
+  }
+
+  function render(s) {
+    $("simTime").textContent = s.t.toFixed(2) + "s";
+    $("valSpeed").textContent = s.speed.toFixed(1);
+    $("valAccel").textContent =
+      s.accel.x.toFixed(1) + " / " + s.accel.y.toFixed(1) + " / " + s.accel.z.toFixed(1);
+    $("valGyro").textContent =
+      s.gyro.x.toFixed(0) + "/" + s.gyro.y.toFixed(0) + "/" + s.gyro.z.toFixed(0);
+    $("valTempBatt").textContent =
+      s.engine_temp.toFixed(1) + "°C · " + s.battery.toFixed(0) + "%";
+
+    /* Compute Live Deltas (Δ) for Executive KPI Ribbon */
+    var dv = (prevSpeed !== null) ? (s.speed - prevSpeed) : 0.0;
+    prevSpeed = s.speed;
+    var dSpdEl = $("deltaSpeed");
+    dSpdEl.textContent = "Δ " + (dv >= 0 ? "+" : "") + dv.toFixed(1) + " km/h";
+    dSpdEl.className = "delta-badge " + (dv < -5 ? "delta-crit" : (Math.abs(dv) > 1.5 ? "delta-neg" : "delta-ok"));
+    $("barSpeed").style.width = Math.min(100, (s.speed / 120) * 100) + "%";
+
+    var dt = (prevTemp !== null) ? (s.engine_temp - prevTemp) : 0.0;
+    prevTemp = s.engine_temp;
+    var dTmpEl = $("deltaTemp");
+    dTmpEl.textContent = "Δ " + (dt >= 0 ? "+" : "") + dt.toFixed(1) + "°C";
+    dTmpEl.className = "delta-badge " + (s.engine_temp >= 100 ? "delta-crit" : "delta-ok");
+    $("barTemp").style.width = Math.min(100, (s.engine_temp / 130) * 100) + "%";
+    $("barTemp").style.backgroundColor = s.engine_temp >= 100 ? "var(--rose)" : "var(--cyan)";
+
+    var netB = $("netBadge");
+    netB.textContent = s.network_up ? "4G LTE" : "OFFLINE";
+    netB.className = "pill " + (s.network_up ? "up" : "down");
+
+    var armB = $("armBadge");
+    var isArmed = s.detector && s.detector.armed;
+    armB.textContent = isArmed ? "ARMED" : "DISARMED";
+    armB.className = "pill " + (isArmed ? "warn" : "up");
+
+    var laB = $("lastAlertBadge");
+    laB.textContent = s.last_alert + (s.last_alert_time ? " @" + s.last_alert_time.toFixed(1) + "s" : "");
+    laB.className = "pill " + (s.last_alert === "NONE" ? "info" : "down");
+
+    /* State Machine Pipeline */
+    var states = ["NORMAL", "SUSPECTED", "CONFIRMED", "LOCKDOWN"];
+    var curSm = (s.sm && s.sm.state) ? s.sm.state : "NORMAL";
+    states.forEach(function (stName) {
+      var el = $("sm" + stName);
+      el.className = "sm-step" + (curSm === stName ? (" active-" + stName) : "");
+    });
+    if (s.sm) {
+      $("smStatusBanner").textContent = s.sm.status;
+    }
+
+    /* Relays */
+    if (s.relays) {
+      var engCut = s.relays.engine === 1;
+      $("boxEngine").className = "relay-box" + (engCut ? " on-danger" : "");
+      $("ledEngine").className = "relay-led " + (engCut ? "on-red" : "on-green");
+      $("txtEngine").textContent = engCut ? "CUT-OFF ENGAGED (≤3 km/h)" : "NC Relay: RUN ALLOWED";
+
+      var sirOn = s.relays.siren === 1;
+      $("boxSiren").className = "relay-box" + (sirOn ? " on-danger" : "");
+      $("ledSiren").className = "relay-led " + (sirOn ? "on-red" : "");
+      $("txtSiren").textContent = sirOn ? "SIREN ACTIVE (110 dB)" : "NO Relay: SILENT";
+
+      var lgtOn = s.relays.lights === 1;
+      $("boxLights").className = "relay-box" + (lgtOn ? " on-warn" : "");
+      $("ledLights").className = "relay-led " + (lgtOn ? "on-amber" : "");
+      $("txtLights").textContent = lgtOn ? "HAZARD FLASHERS ON" : "NO Relay: OFF";
+
+      var lckOn = s.relays.lock === 1;
+      $("boxLock").className = "relay-box" + (lckOn ? " on-warn" : "");
+      $("ledLock").className = "relay-led " + (lckOn ? "on-amber" : "on-green");
+      $("txtLock").textContent = lckOn ? "DOORS LOCKED (THEFT)" : "FAIL-SAFE: UNLOCKED";
+    }
+
+    /* Ring Buffer Visualizer */
+    var cap = s.queue_capacity || 128;
+    var cnt = s.queue_count || 0;
+    var headSlot = Math.floor(((s.queue_head || 0) / cap) * 32) % 32;
+    var tailSlot = Math.floor(((s.queue_tail || 0) / cap) * 32) % 32;
+    var filledSlots = Math.round((cnt / cap) * 32);
+    $("ringStats").textContent = cnt + " / " + cap + " pkts";
+    $("valOverwrites").textContent = String(s.queue_overwrites || 0);
+    var cells = ringGrid.children;
+    for (var idx = 0; idx < 32; idx++) {
+      var cls = "ring-cell";
+      if (idx < filledSlots) cls += " filled";
+      if (cnt > 0 && idx === headSlot) cls += " is-head";
+      if (idx === tailSlot) cls += " is-tail";
+      cells[idx].className = cls;
+    }
+
+    /* Detector Internals & Diff Streams */
+    if (s.detector) {
+      var linA = s.detector.lin_amag || 0;
+      if (linA > peakLinA) peakLinA = linA;
+      $("valLinA").textContent = linA.toFixed(2);
+      $("peakLinA").textContent = peakLinA.toFixed(1);
+      $("barLinA").style.width = Math.min(100, (linA / 35) * 100) + "%";
+      $("barLinA").style.backgroundColor = linA > 25 ? "var(--rose)" : "var(--cyan)";
+
+      var amagNow = Math.sqrt(s.accel.x * s.accel.x + s.accel.y * s.accel.y + s.accel.z * s.accel.z);
+      var diffFromMean = amagNow - s.detector.mean;
+      var dLinEl = $("deltaLinA");
+      dLinEl.textContent = "Δ " + (diffFromMean >= 0 ? "+" : "") + diffFromMean.toFixed(1) + " m/s²";
+      dLinEl.className = "delta-badge " + (Math.abs(diffFromMean) > 15 ? "delta-crit" : "delta-pos");
+
+      $("detMean").textContent = s.detector.mean.toFixed(2);
+      $("detVar").textContent = s.detector.var.toFixed(3);
+      $("detZ").textContent = s.detector.z.toFixed(2);
+
+      var dzEl = $("deltaZ");
+      var zGap = s.detector.z - 3.0;
+      dzEl.textContent = (zGap >= 0 ? "GATE +" : "MARGIN ") + zGap.toFixed(2) + "σ";
+      dzEl.className = "delta-badge " + (s.detector.z >= 3.0 ? "delta-crit" : "delta-ok");
+      $("barZ").style.width = Math.min(100, (Math.abs(s.detector.z) / 5.0) * 100) + "%";
+      $("barZ").style.backgroundColor = s.detector.z >= 3.0 ? "var(--rose)" : "var(--teal)";
+
+      $("deltaGyro").textContent = "Tilt " + s.detector.rollover_ms.toFixed(0) + "ms";
+      $("deltaGyro").className = "delta-badge " + (s.detector.rollover_ms >= 60 ? "delta-crit" : "delta-ok");
+      $("barTilt").style.width = Math.min(100, (s.detector.rollover_ms / 80) * 100) + "%";
+
+      $("detReasonBanner").textContent = s.detector.reason;
+
+      zHistory.push(s.detector.z);
+      diffAHistory.push(diffFromMean);
+      if (zHistory.length > 90) zHistory.shift();
+      if (diffAHistory.length > 90) diffAHistory.shift();
+      drawDiffAndZPlot();
+    }
+
+    /* GPS & Scrubber */
+    if (s.gps) {
+      var gfix = $("gpsFixBadge");
+      gfix.textContent = s.gps.valid ? "GNSS 3D FIX" : "GNSS LOST";
+      gfix.className = "pill " + (s.gps.valid ? "up" : "warn");
+      drawGpsMap(s.gps);
+    }
+
+    if (s.snapshot && !$("freezeScrub").checked) {
+      latestSnapshot = s.snapshot;
+      $("snapCount").textContent = String(latestSnapshot.length);
+      var sl = $("scrubSlider");
+      sl.max = Math.max(0, latestSnapshot.length - 1);
+      sl.value = sl.max;
+      window.renderScrubFrame();
+    }
+
+    /* Modem, LoRa & Outbox */
+    if (s.modem) {
+      $("modemRssi").textContent = s.modem.rssi + " dBm";
+      $("atCmdText").textContent = s.modem.at_cmd;
+      $("atRespText").textContent = s.modem.at_resp;
+    }
+    if (s.lora) {
+      $("loraSent").textContent = String(s.lora.sent);
+      $("loraPayloadText").textContent = s.lora.last_payload;
+    }
+    $("pubStats").textContent = s.pub_attempts + " / " + s.pub_successes;
+    $("outboxLen").textContent = s.outbox_len + " / 64";
+    $("flashWearStats").textContent =
+      "Flash Writes: " + (s.flash_writes || 0) + " (Batched from " + (s.mutations_count || 0) + " mutations)";
+
+    var obTb = $("outboxTable");
+    obTb.innerHTML = "";
+    (s.alerts || []).forEach(function (a) {
+      var tr = document.createElement("tr");
+      tr.innerHTML =
+        "<td>#" + a.id + "</td>" +
+        "<td>" + a.type + "</td>" +
+        "<td class='sev-" + a.severity + "'>" + a.severity + "</td>" +
+        "<td>" + a.lat.toFixed(4) + "," + a.lon.toFixed(4) + "</td>" +
+        "<td>" + a.retries + "</td>" +
+        "<td>" + a.retry_in.toFixed(1) + "s</td>";
+      obTb.appendChild(tr);
+    });
+
+    /* Security & Relay Log */
+    if (s.security) {
+      $("secCounters").textContent =
+        "Verified: " + s.security.verified + " · Blocked: " + s.security.rejected;
+      $("secAuditBanner").textContent = s.security.audit;
+    }
+
+    var rlTb = $("relayLogTable");
+    rlTb.innerHTML = "";
+    (s.relay_log || []).slice().reverse().slice(0, 6).forEach(function (r) {
+      var tr = document.createElement("tr");
+      tr.innerHTML =
+        "<td>" + r.t.toFixed(2) + "</td>" +
+        "<td>" + r.relay + "</td>" +
+        "<td>" + (r.state ? "<span style='color:var(--rose)'>ON (1)</span>" : "<span style='color:var(--teal)'>SAFE (0)</span>") + "</td>" +
+        "<td>" + r.reason + "</td>";
+      rlTb.appendChild(tr);
+    });
+
+    drawAccelPlot(s.plot || {});
+  }
+
+  function startStream() {
+    if (typeof EventSource !== "undefined") {
+      var es = new EventSource("/api/stream");
+      es.onmessage = function (ev) {
+        try {
+          var data = JSON.parse(ev.data);
+          $("streamBadge").textContent = "SSE 250Hz";
+          $("streamBadge").className = "pill up";
+          render(data);
+        } catch (e) {}
+      };
+      es.onerror = function () {
+        $("streamBadge").textContent = "POLL MODE";
+        $("streamBadge").className = "pill warn";
+      };
+    }
+    setInterval(function () {
+      fetch("/api/state")
+        .then(function (r) { return r.json(); })
+        .then(render)
+        .catch(function () {});
+    }, 600);
+  }
+
+  startStream();
+})();
+</script>
+</body>
+</html>

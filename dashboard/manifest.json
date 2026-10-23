@@ -1,0 +1,16 @@
+{
+  "name": "Telemetry & Anomaly Reconstruction Engine",
+  "short_name": "TelemetryEngine",
+  "description": "Edge-Side Vehicle Black-Box, Virtual Hardware & Anomaly Reconstruction Dashboard",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0b1220",
+  "theme_color": "#3dd6c6",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'%3E%3Crect width='128' height='128' rx='24' fill='%230b1220'/%3E%3Ccircle cx='64' cy='64' r='42' fill='none' stroke='%233dd6c6' stroke-width='8'/%3E%3Cpath d='M36 68 L54 68 L62 44 L72 84 L80 60 L92 60' fill='none' stroke='%23ff5d6c' stroke-width='6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E",
+      "sizes": "128x128",
+      "type": "image/svg+xml"
+    }
+  ]
+}

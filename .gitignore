@@ -1,0 +1,32 @@
+# Build Artifacts
+build/
+*.o
+*.exe
+*.obj
+*.out
+*.dSYM/
+
+# Data / Persistence Files & Secrets
+data/
+src/secrets.h
+esp32_firmware/**/secrets.h
+
+# OS Generated Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# VS Code / IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Arduino
+esp32_firmware/**/*.ino.bin
+esp32_firmware/**/*.ino.elf
+esp32_firmware/**/*.ino.hex

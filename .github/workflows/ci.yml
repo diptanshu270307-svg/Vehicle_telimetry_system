@@ -1,0 +1,23 @@
+name: C11 Telemetry Engine CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build engine and unit tests (strict C11)
+        run: make all CFLAGS="-Wall -Wextra -Werror -std=c11 -O2 -g"
+
+      - name: Run unit, CSV replay, confusion matrix, and benchmark suites
+        run: make test
+
+      - name: Run headless hardware-free auto-demo acceptance check
+        run: ./build/engine --auto-demo --seed 42 --no-http --duration 8
