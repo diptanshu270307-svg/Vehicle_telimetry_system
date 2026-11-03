@@ -8,6 +8,8 @@
 
 Edge-side automotive crash black-box, multi-signal anomaly detector, and fail-safe relay controller written in **pure C11** (zero `malloc`, zero external libraries), featuring a **100% Hardware-Free Desktop Virtual Lab (`TARE // MX-PRO` Differential Analytics Suite)** and a **Dual-Core FreeRTOS ESP32 Firmware** port.
 
+> **🚀 Live Interactive Dashboard:** **[https://diptanshu270307-svg.github.io/Vehicle_telimetry_system/](https://diptanshu270307-svg.github.io/Vehicle_telimetry_system/)**
+>
 > **Quick Links:** [Live Dashboard (`index.html`)](index.html) · [1-Page Demo Script](DEMO_SCRIPT.md) · [ESP32 Hardware & Wiring Guide](esp32_firmware/HARDWARE_SETUP.md) · [Contributing & Test Guide](CONTRIBUTING.md) · [MIT License](LICENSE)
 
 ---
