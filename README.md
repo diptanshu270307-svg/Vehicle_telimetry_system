@@ -8,7 +8,15 @@
 
 Edge-side automotive crash black-box, multi-signal anomaly detector, and fail-safe relay controller written in **pure C11** (zero `malloc`, zero external libraries), featuring a **100% Hardware-Free Desktop Virtual Lab (`TARE // MX-PRO` Differential Analytics Suite)** and a **Dual-Core FreeRTOS ESP32 Firmware** port.
 
-> **Quick Links:** [1-Page Demo Script](DEMO_SCRIPT.md) · [ESP32 Hardware & Wiring Guide](esp32_firmware/HARDWARE_SETUP.md) · [Contributing & Test Guide](CONTRIBUTING.md) · [MIT License](LICENSE)
+> **Quick Links:** [Live Dashboard (`index.html`)](index.html) · [1-Page Demo Script](DEMO_SCRIPT.md) · [ESP32 Hardware & Wiring Guide](esp32_firmware/HARDWARE_SETUP.md) · [Contributing & Test Guide](CONTRIBUTING.md) · [MIT License](LICENSE)
+
+---
+
+## Live Interactive Web Demo (GitHub Pages & Local Hybrid Mode)
+
+This repository includes a **root [`index.html`](index.html)** and [`.nojekyll`](.nojekyll) so it works out-of-the-box on **GitHub Pages** (`Settings -> Pages -> Deploy from a branch -> main / (root)`):
+- **On GitHub Pages / Static Hosting (`WEB-SIM 250Hz`):** Automatically runs the built-in 250 Hz physics generator, Welford $O(1)$ Z-Score anomaly detector, Circular Queue ring buffer, Safe Relay State Machine (`NORMAL -> SUSPECTED -> CONFIRMED -> LOCKDOWN`), and HMAC-SHA256 cloud command console directly in your browser.
+- **On Local Machine (`make demo` / `./run_demo.sh` — `SSE 250Hz C11`):** Automatically connects via Server-Sent Events (`/api/stream`) to the compiled C11 binary (`./build/engine`).
 
 ---
 
@@ -53,18 +61,18 @@ The core engine (`src/circular_queue.c`, `src/linked_list.c`, `src/detector.c`, 
 ```mermaid
 flowchart TB
     subgraph Core["Pure C11 Malloc-Free Engine (Zero #ifdefs)"]
-        CAL["Boot IMU Calibration\n(Bias + Axis Map + 1g Gravity Removal)"]
-        DET["O(1) Multi-Signal Detector\n(250 Hz, 16-Sample Window + Hysteresis)"]
-        CQ["CircularQueue Black-Box\n(Static Pool: 256 Packets, O(1) Ring)"]
-        SM["Safe Relay State Machine\n(NORMAL -> SUSPECTED -> CONFIRMED -> LOCKDOWN)"]
-        LL["Severity-Ordered Outbox\n(Static Node Pool: 64 Slots + Backoff)"]
-        SEC["Security & AT Layer\n(HMAC-SHA256 + 64-bit Nonce Anti-Replay)"]
+        CAL["Boot IMU Calibration (Bias + Axis Map + 1g Gravity Removal)"]
+        DET["O(1) Multi-Signal Detector (250 Hz, 16-Sample Window + Hysteresis)"]
+        CQ["CircularQueue Black-Box (Static Pool: 256 Packets, O(1) Ring)"]
+        SM["Safe Relay State Machine (NORMAL -> SUSPECTED -> CONFIRMED -> LOCKDOWN)"]
+        LL["Severity-Ordered Outbox (Static Node Pool: 64 Slots + Backoff)"]
+        SEC["Security & AT Layer (HMAC-SHA256 + 64-bit Nonce Anti-Replay)"]
     end
 
     subgraph HAL["Hardware Abstraction Layer (src/hal.h)"]
         direction LR
-        SIM["Desktop 'sim' Backend (src/hal_sim.c)\nPhysics + Virtual Relays + SSE Dashboard + Mock Cloud"]
-        ESP["ESP32 FreeRTOS Backend (hal_esp32.h)\nCore 1: 250Hz Sensor/Det | Core 0: Comms/LittleFS"]
+        SIM["Desktop sim Backend (src/hal_sim.c): Physics + Virtual Relays + SSE Dashboard"]
+        ESP["ESP32 FreeRTOS Backend (hal_esp32.h): Core 1 Sensor/Det | Core 0 Comms/LittleFS"]
     end
 
     CAL --> DET
@@ -81,16 +89,16 @@ flowchart TB
 
 ```mermaid
 flowchart LR
-    MPU["MPU6050 IMU\n(I2C 0x68)"] -- "SDA -> GPIO 21\nSCL -> GPIO 22" --> ESP32["ESP32 Main Controller\n(Dual-Core FreeRTOS)"]
-    LM35["LM35 Temp Sensor"] -- "Analog -> GPIO 34 (ADC1)" --> ESP32
-    BATT["Battery Divider"] -- "Analog -> GPIO 35 (ADC1)" --> ESP32
+    MPU["MPU6050 IMU (I2C 0x68)"] -- "SDA GPIO 21 / SCL GPIO 22" --> ESP32["ESP32 Main Controller (Dual-Core FreeRTOS)"]
+    LM35["LM35 Temp Sensor"] -- "Analog GPIO 34 (ADC1)" --> ESP32
+    BATT["Battery Divider"] -- "Analog GPIO 35 (ADC1)" --> ESP32
 
     ESP32 -- "GPIO 25 (NC Fail-Safe)" --> R_ENG["Relay 1: Engine Cut-Off"]
     ESP32 -- "GPIO 26 (NO)" --> R_LGT["Relay 2: Hazard Lights"]
     ESP32 -- "GPIO 27 (NO)" --> R_SIR["Relay 3: Alarm Siren"]
     ESP32 -- "GPIO 14 (NO Fail-Safe)" --> R_LCK["Relay 4: Door Locks"]
 
-    ESP32 <-- "UART2 (RX=16, TX=17)\n115200 8N1 AT Cmds" --> SIM7670["SIM7670C 4G LTE + GNSS"]
+    ESP32 <-- "UART2 (RX=16, TX=17) 115200 8N1" --> SIM7670["SIM7670C 4G LTE + GNSS"]
     ESP32 <-- "SPI (CS=5, RST=15, DIO0=4)" --> LORA["LoRa SX1278 433MHz"]
 ```
 

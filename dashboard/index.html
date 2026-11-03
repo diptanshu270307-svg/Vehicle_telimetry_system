@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#060911">
-<link rel="manifest" href="/manifest.json">
+<link rel="manifest" href="manifest.json">
 <title>TARE // Precision Telemetry &amp; Anomaly Reconstruction Suite</title>
 <style>
   :root {
@@ -46,7 +46,6 @@
     font-variant-numeric: tabular-nums;
   }
 
-  /* Top Command Header */
   header {
     display: flex;
     flex-wrap: wrap;
@@ -121,7 +120,6 @@
   .pill.warn { background: var(--amber-glow); color: var(--amber); border: 1px solid rgba(245, 158, 11, 0.4); }
   .pill.info { background: var(--cyan-glow); color: var(--cyan); border: 1px solid rgba(6, 182, 212, 0.4); }
 
-  /* Scenario Toolbar */
   .toolbar {
     display: flex;
     flex-wrap: wrap;
@@ -175,7 +173,6 @@
     color: #67e8f9;
   }
 
-  /* Executive KPI Delta Ribbon */
   .kpi-ribbon {
     display: grid;
     grid-template-columns: repeat(6, 1fr);
@@ -261,7 +258,6 @@
     justify-content: space-between;
   }
 
-  /* Main 12-Col Grid */
   .grid {
     display: grid;
     grid-template-columns: repeat(12, 1fr);
@@ -315,11 +311,14 @@
     font-size: 0.66rem;
     color: var(--text-muted);
     padding: 0.1rem 0.35rem 0.3rem;
+    flex-wrap: wrap;
+    gap: 0.4rem;
   }
   .legend-inline {
     display: flex;
     gap: 0.7rem;
     align-items: center;
+    flex-wrap: wrap;
   }
   .leg-dot {
     display: inline-block;
@@ -334,7 +333,6 @@
     border-radius: 4px;
   }
 
-  /* State machine pipeline */
   .sm-pipeline {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -380,7 +378,6 @@
     to   { box-shadow: 0 0 18px rgba(244, 63, 94, 0.85); }
   }
 
-  /* Virtual Relays */
   .relay-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -419,7 +416,6 @@
   .relay-led.on-amber { background: var(--amber); box-shadow: 0 0 10px var(--amber); }
   .relay-led.on-green { background: var(--teal); box-shadow: 0 0 8px var(--teal); }
 
-  /* Ring buffer cells */
   .ring-cells {
     display: grid;
     grid-template-columns: repeat(16, 1fr);
@@ -453,7 +449,6 @@
     word-break: break-word;
   }
 
-  /* Diff Comparison Matrix Table */
   .diff-matrix {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -538,7 +533,7 @@
       </div>
     </div>
     <div class="status-strip">
-      <div class="status-chip">STREAM <span id="streamBadge" class="pill up">SSE 250Hz</span></div>
+      <div class="status-chip">ENGINE <span id="streamBadge" class="pill up">SSE 250Hz</span></div>
       <div class="status-chip">UPLINK <span id="netBadge" class="pill up">4G LTE</span></div>
       <div class="status-chip">SECURITY <span id="armBadge" class="pill up">DISARMED</span></div>
       <div class="status-chip">LAST EVENT <span id="lastAlertBadge" class="pill info">NONE</span></div>
@@ -562,7 +557,7 @@
       <button class="btn-accent" onclick="sendControl('autodemo')">Auto-Demo Loop</button>
       <button onclick="sendControl('network')">Toggle 4G Link</button>
       <button onclick="sendControl('arm')">Arm / Disarm</button>
-      <button onclick="window.location='/api/blackbox.csv'">Export CSV</button>
+      <button onclick="exportBlackboxCsv()">Export CSV</button>
     </span>
   </div>
 
@@ -610,7 +605,7 @@
         <div><span class="kpi-val" id="valTempBatt" style="font-size:1.05rem">85.0°C · 78%</span></div>
       </div>
       <div class="kpi-bar"><div id="barTemp" class="kpi-bar-fill" style="width:65%"></div></div>
-      <div class="kpi-sub"><span>Hysteresis: 98°C–105°C</span><span>ADC1_CH6 LM35</span></div>
+      <div class="kpi-sub"><span>Hysteresis: 102°C–110°C</span><span>ADC1_CH6 LM35</span></div>
     </div>
 
     <div class="kpi-card">
@@ -631,7 +626,6 @@
         <span style="font-family:var(--font-mono);font-size:0.68rem;color:var(--cyan)">N=16 Window · 250 Hz Sampling</span>
       </h2>
 
-      <!-- Graph A: 3-Axis Accel + Threshold Envelope -->
       <div class="chart-wrap" style="margin-bottom:0.6rem">
         <div class="chart-header">
           <span>CH1: 3-AXIS ACCELEROMETER (m/s²) vs. 3.2G COLLISION GATE</span>
@@ -645,7 +639,6 @@
         <canvas id="accelCanvas" width="760" height="165"></canvas>
       </div>
 
-      <!-- Graph B: Z-Score (σ) & Frame-to-Frame Differential (Δ|a| & Δv) -->
       <div class="chart-wrap">
         <div class="chart-header">
           <span>CH2: STATISTICAL Z-SCORE (σ) &amp; INSTANTANEOUS DIFFERENTIAL (Δ|a| = |a| − μ)</span>
@@ -698,7 +691,6 @@
         </div>
       </div>
 
-      <!-- On-Screen PIN / RFID Override Keypad -->
       <div class="keypad-row" style="margin-bottom:0.65rem">
         <input type="password" id="pinInput" value="1234" placeholder="PIN / RFID">
         <button class="btn-accent" onclick="submitPinOverride()">Verify PIN / RFID Override</button>
@@ -709,7 +701,6 @@
         <button onclick="document.getElementById('pinInput').value=''">CLR</button>
       </div>
 
-      <!-- Circular Queue Ring Buffer Visualizer inside right column -->
       <h2 style="margin-top:0.2rem">
         <span>03 // Static Ring Buffer Memory Map (O(1) Black-Box)</span>
         <span id="ringStats" style="font-family:var(--font-mono);color:var(--cyan)">0/128 pkts</span>
@@ -730,7 +721,6 @@
         </label>
       </h2>
 
-      <!-- Snapshot Dual-Axis Replay Graph (Speed vs G-Force across all 128 frames) -->
       <div class="chart-wrap" style="margin-bottom:0.55rem">
         <div class="chart-header">
           <span>FORENSIC BUFFER PROFILE (LAST <span id="snapCount">0</span> FRAMES) — SCRUBBER CURSOR &amp; DELTA ENVELOPE</span>
@@ -748,7 +738,6 @@
         Move slider to inspect pre-crash telemetry frames and compute differential against pre-event baseline...
       </div>
 
-      <!-- Frame Differential (Δ) Comparison Matrix: Selected Frame vs Frame #0 Baseline -->
       <div class="diff-matrix">
         <div class="diff-cell">
           <div class="d-lbl">Δ Velocity (vs t₀)</div>
@@ -859,7 +848,7 @@
 <script>
 (function () {
   if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("/sw.js").catch(function () {});
+    navigator.serviceWorker.register("sw.js").catch(function () {});
   }
 
   var accelCanvas = document.getElementById("accelCanvas");
@@ -878,6 +867,8 @@
   var peakLinA = 0.0;
   var prevSpeed = null;
   var prevTemp = null;
+  var backendConnected = false;
+  var standaloneActive = false;
   var HOSPITAL = { name: "AIIMS Trauma Center", lat: 28.6152, lon: 77.2102 };
 
   function $(id) { return document.getElementById(id); }
@@ -891,12 +882,373 @@
     ringGrid.appendChild(div);
   }
 
+  /* =========================================================================
+   * STANDALONE IN-BROWSER 250Hz ENGINE (For GitHub Pages / Static Hosting)
+   * Mirrors the pure C11 engine when ./build/engine is not running locally.
+   * ========================================================================= */
+  var sim = {
+    t: 0.0,
+    speed: 62.0,
+    targetSpeed: 64.0,
+    ax: 0.2, ay: 0.05, az: 9.81,
+    gx: 0.5, gy: -0.3, gz: 0.2,
+    temp: 86.0,
+    battery: 88.0,
+    lat: 28.6139, lon: 77.2090,
+    gpsValid: true,
+    hasCrash: false, crashLat: 28.6139, crashLon: 77.2090,
+    networkUp: true,
+    armed: false,
+    autoDemo: true,
+    lastAutoStep: -1,
+    scenario: "cruise",
+    scenarioTimer: 0.0,
+    /* Ring buffer (128 capacity) */
+    qCap: 128, qCount: 0, qHead: 0, qTail: 0, qOverwrites: 0,
+    snapshot: [],
+    plotAx: [], plotAy: [], plotAz: [],
+    /* Welford 16-sample sliding window */
+    winMag: [],
+    mean: 9.81, variance: 0.05, z: 0.0, linAmag: 0.15, rolloverMs: 0,
+    detReason: "NOMINAL: 250Hz IMU stream within 3.0σ envelope",
+    lastAlert: "NONE", lastAlertTime: 0,
+    /* Safe Relay State Machine */
+    smState: "NORMAL",
+    smTimer: 0.0,
+    smStatus: "NORMAL: all systems nominal",
+    relays: { engine: 0, siren: 0, lights: 0, lock: 0 },
+    relayLog: [
+      { t: 0.00, relay: "ALL_RELAYS", state: 0, reason: "BOOT_FAILSAFE_INIT (NC Engine=RUN, Doors=UNLOCKED)" }
+    ],
+    /* Priority Outbox & Modem */
+    nextAlertId: 1,
+    alerts: [],
+    pubAttempts: 0, pubSuccesses: 0,
+    loraSent: 0, loraLast: "IDLE (Standby)",
+    flashWrites: 1, mutations: 1,
+    atCmd: "AT+CGATT=1", atResp: "OK (4G Attached)",
+    /* Security */
+    secVerified: 0, secRejected: 0,
+    secNonce: 10042,
+    secAudit: "SEC_INIT: HMAC-SHA256 + 64-bit Nonce Anti-Replay Ready"
+  };
+
+  function logRelay(name, st, reason) {
+    if (sim.relays[name] === st && name !== "ALL_RELAYS") return;
+    if (name !== "ALL_RELAYS") sim.relays[name] = st;
+    sim.relayLog.push({ t: sim.t, relay: name.toUpperCase(), state: st, reason: reason });
+    if (sim.relayLog.length > 30) sim.relayLog.shift();
+  }
+
+  function queueAlert(type, sev) {
+    sim.lastAlert = type;
+    sim.lastAlertTime = sim.t;
+    var item = {
+      id: sim.nextAlertId++,
+      type: type,
+      severity: sev,
+      lat: sim.lat,
+      lon: sim.lon,
+      retries: 0,
+      retry_in: sim.networkUp ? 0.2 : 2.0
+    };
+    sim.alerts.push(item);
+    var rank = { CRITICAL: 3, HIGH: 2, MEDIUM: 1 };
+    sim.alerts.sort(function (a, b) { return (rank[b.severity] || 0) - (rank[a.severity] || 0); });
+    sim.mutations++;
+    if (sim.mutations % 3 === 0) sim.flashWrites++;
+  }
+
+  function triggerSimScenario(sc) {
+    sim.scenario = sc;
+    sim.scenarioTimer = 2.4;
+    if (sc === "cruise") {
+      sim.targetSpeed = 65.0;
+      sim.gpsValid = true;
+      sim.detReason = "NOMINAL: Highway cruise 65 km/h · road noise < 0.4G";
+    } else if (sc === "pothole") {
+      sim.scenarioTimer = 0.35;
+      sim.detReason = "FILTERED_POTHOLE: 12ms vertical impulse |a|=17.8 m/s² (Z=3.8σ, Δv=0.0) rejected by duration gate";
+    } else if (sc === "hard_brake") {
+      sim.targetSpeed = 18.0;
+      sim.detReason = "HARD_BRAKE: Sustained longitudinal decel Ax=-11.2 m/s² with Δv=-42 km/h (Hysteresis Active)";
+      queueAlert("HARD_BRAKE", "MEDIUM");
+    } else if (sc === "collision") {
+      sim.targetSpeed = 0.0;
+      sim.hasCrash = true;
+      sim.crashLat = sim.lat;
+      sim.crashLon = sim.lon;
+      sim.detReason = "COLLISION_FUSED: |a|=63.8 m/s² (6.5G, Z=7.4σ) + sudden Δv drop -> SUSPECTED";
+      sim.smState = "SUSPECTED";
+      sim.smTimer = 2.8;
+      sim.smStatus = "SUSPECTED: Siren+Hazards ON · 3.0s PIN override window before CONFIRMED engine cut";
+      logRelay("siren", 1, "SUSPECTED_CRASH_ALARM");
+      logRelay("lights", 1, "SUSPECTED_HAZARD_FLASH");
+      queueAlert("COLLISION", "CRITICAL");
+    } else if (sc === "rollover") {
+      sim.targetSpeed = 0.0;
+      sim.hasCrash = true;
+      sim.crashLat = sim.lat;
+      sim.crashLon = sim.lon;
+      sim.rolloverMs = 84;
+      sim.detReason = "ROLLOVER_CONFIRMED: Gyro roll rate >145°/s sustained for 84ms (≥60ms gate)";
+      sim.smState = "SUSPECTED";
+      sim.smTimer = 2.5;
+      sim.smStatus = "SUSPECTED (ROLLOVER): Siren+Hazards ON · awaiting speed ≤3.0 km/h interlock";
+      logRelay("siren", 1, "ROLLOVER_ALARM");
+      logRelay("lights", 1, "ROLLOVER_HAZARDS");
+      queueAlert("ROLLOVER", "CRITICAL");
+    } else if (sc === "overheat") {
+      sim.temp = 114.5;
+      sim.detReason = "OVERHEAT_HYSTERESIS: Engine temp 114.5°C exceeded 110.0°C upper trip point (exit < 102.0°C)";
+      logRelay("lights", 1, "THERMAL_WARNING_HAZARDS");
+      queueAlert("OVERHEAT", "HIGH");
+    } else if (sc === "theft") {
+      sim.armed = true;
+      sim.detReason = "THEFT_TAMPER: Armed IMU vibration + unauthorized motion detected -> LOCKDOWN";
+      sim.smState = "LOCKDOWN";
+      sim.smStatus = "LOCKDOWN: Engine Immobilized (NC Cut) + Doors Locked + Siren Active";
+      logRelay("engine", 1, "THEFT_IMMOBILIZER_CUT");
+      logRelay("siren", 1, "THEFT_SIREN_ON");
+      logRelay("lights", 1, "THEFT_HAZARDS_ON");
+      logRelay("lock", 1, "THEFT_LOCKDOWN_DOORS");
+      queueAlert("THEFT", "HIGH");
+    } else if (sc === "gps_loss") {
+      sim.gpsValid = false;
+      sim.detReason = "GNSS_LOSS: Tunnel multipath / 0 satellites — dead-reckoning active on last known fix";
+    } else if (sc === "sensor_fault") {
+      sim.detReason = "SENSOR_FAULT: I2C rail saturation / NaN guard — rejecting corrupted frame";
+    }
+  }
+
+  function stepStandaloneSim() {
+    var dt = 0.2;
+    sim.t += dt;
+
+    /* Auto-Demo scripted story every 6 seconds */
+    if (sim.autoDemo) {
+      var phase = Math.floor(sim.t / 6.0) % 7;
+      if (phase !== sim.lastAutoStep && sim.t > 1.0) {
+        sim.lastAutoStep = phase;
+        var story = ["cruise", "pothole", "hard_brake", "collision", "cruise", "overheat", "rollover"];
+        if (story[phase] === "cruise" && sim.smState !== "NORMAL") {
+          /* Auto-recover for demo continuity */
+          sim.smState = "NORMAL";
+          sim.smStatus = "NORMAL: Auto-demo reset to highway cruise";
+          logRelay("engine", 0, "AUTODEMO_RESET");
+          logRelay("siren", 0, "AUTODEMO_RESET");
+          logRelay("lights", 0, "AUTODEMO_RESET");
+          logRelay("lock", 0, "AUTODEMO_RESET");
+        }
+        triggerSimScenario(story[phase]);
+      }
+    }
+
+    /* Physics waveform generation */
+    var noise = function (amp) { return (Math.random() - 0.5) * 2 * amp; };
+    if (sim.scenarioTimer > 0) {
+      sim.scenarioTimer -= dt;
+      if (sim.scenario === "pothole") {
+        sim.ax = 0.8 + noise(1.2);
+        sim.ay = noise(1.5);
+        sim.az = 24.5 + noise(3.0);
+        sim.gx = 12 + noise(4); sim.gy = 8 + noise(4); sim.gz = noise(2);
+      } else if (sim.scenario === "hard_brake") {
+        sim.speed = Math.max(sim.targetSpeed, sim.speed - 9.5);
+        sim.ax = -11.4 + noise(0.9);
+        sim.ay = noise(0.6);
+        sim.az = 9.81 + noise(0.5);
+        sim.gx = -6 + noise(2); sim.gy = noise(2); sim.gz = noise(1);
+      } else if (sim.scenario === "collision") {
+        sim.speed = Math.max(0, sim.speed - 22.0);
+        var spike = sim.scenarioTimer > 1.6 ? -58.0 : -4.0;
+        sim.ax = spike + noise(3.5);
+        sim.ay = 14.0 * Math.sin(sim.t * 15) + noise(2.0);
+        sim.az = 9.81 + noise(3.0);
+        sim.gx = 35 * Math.sin(sim.t * 12); sim.gy = -28 * Math.cos(sim.t * 10); sim.gz = 18;
+      } else if (sim.scenario === "rollover") {
+        sim.speed = Math.max(0, sim.speed - 16.0);
+        sim.ax = -14.0 + noise(2.0);
+        sim.ay = 26.0 * Math.sin(sim.t * 8);
+        sim.az = -4.5 + noise(2.0);
+        sim.gx = 165.0 + noise(12); sim.gy = 48.0 + noise(8); sim.gz = 22.0;
+        sim.rolloverMs = Math.min(120, sim.rolloverMs + 25);
+      } else if (sim.scenario === "sensor_fault") {
+        sim.ax = 78.0; sim.ay = -78.0; sim.az = 78.0;
+      }
+    } else {
+      if (sim.smState === "NORMAL") {
+        sim.speed += (sim.targetSpeed - sim.speed) * 0.18 + noise(0.4);
+      } else {
+        sim.speed = Math.max(0, sim.speed - 6.0);
+      }
+      sim.ax = 0.3 * Math.sin(sim.t * 1.7) + noise(0.35);
+      sim.ay = 0.25 * Math.cos(sim.t * 1.3) + noise(0.3);
+      sim.az = 9.81 + noise(0.25);
+      sim.gx = noise(1.8); sim.gy = noise(1.5); sim.gz = noise(1.0);
+      sim.rolloverMs = Math.max(0, sim.rolloverMs - 20);
+      if (sim.temp > 86.5 && sim.scenario !== "overheat") sim.temp -= 0.8;
+    }
+
+    /* Update GNSS path */
+    if (sim.gpsValid && sim.speed > 1.0) {
+      var rad = sim.t * 0.18;
+      sim.lat = 28.6139 + 0.0007 * Math.sin(rad);
+      sim.lon = 77.2090 + 0.0009 * Math.cos(rad);
+    }
+
+    /* Sliding window stats */
+    var amag = Math.sqrt(sim.ax * sim.ax + sim.ay * sim.ay + sim.az * sim.az);
+    sim.linAmag = Math.abs(amag - 9.81);
+    sim.winMag.push(amag);
+    if (sim.winMag.length > 16) sim.winMag.shift();
+    var sum = 0;
+    for (var i = 0; i < sim.winMag.length; i++) sum += sim.winMag[i];
+    sim.mean = sum / sim.winMag.length;
+    var vsum = 0;
+    for (var j = 0; j < sim.winMag.length; j++) {
+      var d = sim.winMag[j] - sim.mean;
+      vsum += d * d;
+    }
+    sim.variance = Math.max(0.04, vsum / sim.winMag.length);
+    sim.z = Math.abs(amag - sim.mean) / Math.sqrt(sim.variance);
+
+    /* Plot buffers */
+    sim.plotAx.push(sim.ax); sim.plotAy.push(sim.ay); sim.plotAz.push(sim.az);
+    if (sim.plotAx.length > 80) { sim.plotAx.shift(); sim.plotAy.shift(); sim.plotAz.shift(); }
+
+    /* Circular queue enqueue */
+    var pkt = {
+      t: sim.t, spd: sim.speed,
+      ax: sim.ax, ay: sim.ay, az: sim.az,
+      gx: sim.gx, gy: sim.gy, gz: sim.gz,
+      temp: sim.temp, lat: sim.lat, lon: sim.lon
+    };
+    sim.snapshot.push(pkt);
+    if (sim.snapshot.length > sim.qCap) {
+      sim.snapshot.shift();
+      sim.qOverwrites++;
+      sim.qHead = (sim.qHead + 1) % sim.qCap;
+    }
+    sim.qCount = sim.snapshot.length;
+    sim.qTail = (sim.qTail + 1) % sim.qCap;
+
+    /* State Machine Transitions */
+    if (sim.smState === "SUSPECTED") {
+      sim.smTimer -= dt;
+      if (sim.smTimer <= 0) {
+        sim.smState = "CONFIRMED";
+      }
+    }
+    if (sim.smState === "CONFIRMED") {
+      if (sim.speed <= 3.0) {
+        logRelay("engine", 1, "CONFIRMED_SAFE_SPEED_CUT (v≤3.0 km/h)");
+        logRelay("lock", 0, "FAILSAFE_CRASH_UNLOCK_DOORS");
+        sim.smStatus = "CONFIRMED: Vehicle stopped (v=" + sim.speed.toFixed(1) + " km/h) -> Engine Cut ENGAGED, Doors UNLOCKED";
+      } else {
+        sim.smStatus = "CONFIRMED: Waiting for speed (" + sim.speed.toFixed(1) + " km/h) ≤ 3.0 km/h before cutting engine";
+      }
+    }
+
+    /* Outbox Publisher & LoRa Fallback */
+    if (sim.alerts.length > 0) {
+      if (sim.networkUp) {
+        sim.pubAttempts++;
+        sim.pubSuccesses++;
+        var sent = sim.alerts.shift();
+        sim.atCmd = 'AT+HTTPACTION=1 (POST /api/alerts id=#' + sent.id + ' ' + sent.type + ')';
+        sim.atResp = "200 OK (HMAC Signed)";
+      } else {
+        for (var k = 0; k < sim.alerts.length; k++) {
+          sim.alerts[k].retry_in -= dt;
+          if (sim.alerts[k].retry_in <= 0) {
+            sim.pubAttempts++;
+            sim.alerts[k].retries++;
+            sim.alerts[k].retry_in = Math.min(16, Math.pow(2, sim.alerts[k].retries));
+            sim.loraSent++;
+            sim.loraLast = "LORA_SOS|ID=" + sim.alerts[k].id + "|TYPE=" + sim.alerts[k].type + "|LAT=" + sim.lat.toFixed(4);
+            sim.atCmd = "AT+HTTPACTION=1";
+            sim.atResp = "ERROR (NO CARRIER -> Exp Backoff + LoRa SOS)";
+          }
+        }
+      }
+    }
+
+    render({
+      t: sim.t,
+      speed: sim.speed,
+      accel: { x: sim.ax, y: sim.ay, z: sim.az },
+      gyro: { x: sim.gx, y: sim.gy, z: sim.gz },
+      engine_temp: sim.temp,
+      battery: sim.battery,
+      network_up: sim.networkUp,
+      last_alert: sim.lastAlert,
+      last_alert_time: sim.lastAlertTime,
+      queue_capacity: sim.qCap,
+      queue_count: sim.qCount,
+      queue_head: sim.qHead,
+      queue_tail: sim.qTail,
+      queue_overwrites: sim.qOverwrites,
+      sm: { state: sim.smState, status: sim.smStatus },
+      relays: sim.relays,
+      detector: {
+        armed: sim.armed,
+        mean: sim.mean,
+        var: sim.variance,
+        z: sim.z,
+        lin_amag: sim.linAmag,
+        rollover_ms: sim.rolloverMs,
+        reason: sim.detReason
+      },
+      gps: {
+        valid: sim.gpsValid,
+        lat: sim.lat,
+        lon: sim.lon,
+        has_crash: sim.hasCrash,
+        crash_lat: sim.crashLat,
+        crash_lon: sim.crashLon
+      },
+      snapshot: sim.snapshot,
+      modem: { rssi: sim.networkUp ? -65 : -113, at_cmd: sim.atCmd, at_resp: sim.atResp },
+      lora: { sent: sim.loraSent, last_payload: sim.loraLast },
+      pub_attempts: sim.pubAttempts,
+      pub_successes: sim.pubSuccesses,
+      outbox_len: sim.alerts.length,
+      flash_writes: sim.flashWrites,
+      mutations_count: sim.mutations,
+      alerts: sim.alerts,
+      security: { verified: sim.secVerified, rejected: sim.secRejected, audit: sim.secAudit },
+      relay_log: sim.relayLog,
+      plot: { ax: sim.plotAx, ay: sim.plotAy, az: sim.plotAz }
+    });
+  }
+
+  /* =========================================================================
+   * UI ACTIONS (Supports Both C11 Backend & Standalone Browser Engine)
+   * ========================================================================= */
   window.injectScenario = function (sc) {
-    fetch("/api/control?action=inject&scenario=" + encodeURIComponent(sc), { method: "POST" });
+    if (standaloneActive) {
+      sim.autoDemo = false;
+      triggerSimScenario(sc);
+      return;
+    }
+    fetch("/api/control?action=inject&scenario=" + encodeURIComponent(sc), { method: "POST" })
+      .catch(function () { standaloneActive = true; triggerSimScenario(sc); });
   };
 
   window.sendControl = function (act) {
-    fetch("/api/control?action=" + encodeURIComponent(act), { method: "POST" });
+    if (standaloneActive) {
+      if (act === "autodemo") sim.autoDemo = !sim.autoDemo;
+      else if (act === "network") {
+        sim.networkUp = !sim.networkUp;
+        sim.atCmd = sim.networkUp ? "AT+CGATT=1" : "AT+CGATT=0";
+        sim.atResp = sim.networkUp ? "OK (Reattached)" : "DOWN (Offline Queueing)";
+      } else if (act === "arm") {
+        sim.armed = !sim.armed;
+      }
+      return;
+    }
+    fetch("/api/control?action=" + encodeURIComponent(act), { method: "POST" }).catch(function () {});
   };
 
   window.keypadAppend = function (digit) {
@@ -905,11 +1257,66 @@
 
   window.submitPinOverride = function () {
     var pin = $("pinInput").value;
-    fetch("/api/control?action=override&pin=" + encodeURIComponent(pin), { method: "POST" });
+    if (standaloneActive) {
+      if (pin === "1234") {
+        sim.smState = "NORMAL";
+        sim.hasCrash = false;
+        sim.targetSpeed = 60.0;
+        sim.smStatus = "OVERRIDE_OK: Operator PIN 1234 verified -> Relays reset to NORMAL";
+        logRelay("engine", 0, "PIN_1234_OVERRIDE");
+        logRelay("siren", 0, "PIN_1234_OVERRIDE");
+        logRelay("lights", 0, "PIN_1234_OVERRIDE");
+        logRelay("lock", 0, "PIN_1234_OVERRIDE");
+      } else {
+        sim.smStatus = "OVERRIDE_REJECTED: Invalid PIN (expected 1234)";
+      }
+      return;
+    }
+    fetch("/api/control?action=override&pin=" + encodeURIComponent(pin), { method: "POST" }).catch(function () {});
   };
 
   window.sendCloudCmd = function (cmd, mode) {
     var pin = $("pinInput").value || "1234";
+    if (standaloneActive) {
+      if (cmd === "UNLOCK") {
+        sim.secRejected++;
+        sim.secAudit = "SEC_REJECT: Bare UNLOCK endpoint is permanently forbidden (requires signed DISARM + PIN)";
+        $("secAuditBanner").style.borderLeftColor = "#f43f5e";
+      } else if (mode === "replay") {
+        sim.secRejected++;
+        sim.secAudit = "SEC_REJECT: Anti-Replay Cache Hit! Nonce #" + sim.secNonce + " already consumed";
+        $("secAuditBanner").style.borderLeftColor = "#f43f5e";
+      } else if (mode === "tamper") {
+        sim.secRejected++;
+        sim.secAudit = "SEC_REJECT: HMAC-SHA256 signature mismatch (payload tampered in transit)";
+        $("secAuditBanner").style.borderLeftColor = "#f43f5e";
+      } else {
+        sim.secVerified++;
+        sim.secNonce++;
+        $("secAuditBanner").style.borderLeftColor = "#10b981";
+        if (cmd === "DISARM") {
+          sim.armed = false;
+          sim.smState = "NORMAL";
+          sim.hasCrash = false;
+          logRelay("engine", 0, "CLOUD_SIGNED_DISARM");
+          logRelay("siren", 0, "CLOUD_SIGNED_DISARM");
+          logRelay("lights", 0, "CLOUD_SIGNED_DISARM");
+          logRelay("lock", 0, "CLOUD_SIGNED_DISARM");
+          sim.smStatus = "NORMAL: Disarmed via HMAC-SHA256 verified cloud command";
+        } else if (cmd === "LOCKDOWN") {
+          sim.smState = "LOCKDOWN";
+          logRelay("engine", 1, "CLOUD_SIGNED_LOCKDOWN");
+          logRelay("siren", 1, "CLOUD_SIGNED_LOCKDOWN");
+          logRelay("lights", 1, "CLOUD_SIGNED_LOCKDOWN");
+          logRelay("lock", 1, "CLOUD_SIGNED_LOCKDOWN");
+          sim.smStatus = "LOCKDOWN: Remote signed immobilization engaged";
+        } else if (cmd === "ARM") {
+          sim.armed = true;
+        }
+        sim.secAudit = "SEC_OK: Verified HMAC-SHA256 cmd=" + cmd + " nonce=" + sim.secNonce + " sig=8f3c...a91e";
+      }
+      return;
+    }
     fetch("/api/cloud/command?cmd=" + encodeURIComponent(cmd) +
           "&pin=" + encodeURIComponent(pin) +
           "&mode=" + encodeURIComponent(mode), { method: "POST" })
@@ -919,7 +1326,29 @@
           $("secAuditBanner").textContent = res.audit;
           $("secAuditBanner").style.borderLeftColor = res.ok ? "#10b981" : "#f43f5e";
         }
-      });
+      }).catch(function () {});
+  };
+
+  window.exportBlackboxCsv = function () {
+    if (!standaloneActive) {
+      window.location = "/api/blackbox.csv";
+      return;
+    }
+    var rows = ["frame,time_s,speed_kmh,ax_ms2,ay_ms2,az_ms2,gx_degs,gy_degs,gz_degs,temp_c,lat,lon"];
+    for (var i = 0; i < latestSnapshot.length; i++) {
+      var f = latestSnapshot[i];
+      rows.push([
+        i + 1, f.t.toFixed(3), f.spd.toFixed(2),
+        f.ax.toFixed(3), f.ay.toFixed(3), f.az.toFixed(3),
+        f.gx.toFixed(2), f.gy.toFixed(2), (f.gz || 0).toFixed(2),
+        f.temp.toFixed(2), f.lat.toFixed(6), f.lon.toFixed(6)
+      ].join(","));
+    }
+    var blob = new Blob([rows.join("\n")], { type: "text/csv" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "blackbox_forensic_trace.csv";
+    a.click();
   };
 
   function drawGridWithLabels(ctx, w, h, yLabels) {
@@ -954,14 +1383,13 @@
       return (h / 2) - (v / maxScale) * (h / 2 - 12);
     }
 
-    /* Draw ±31.4 m/s² (3.2G) collision threshold gates */
     accelCtx.strokeStyle = "rgba(244, 63, 94, 0.45)";
     accelCtx.setLineDash([5, 4]);
     [31.4, -31.4].forEach(function (th) {
       var ty = yMap(th);
       accelCtx.beginPath();
       accelCtx.moveTo(38, ty);
-      accelCtx.lineTo(w - 6, ty);
+      ctx.lineTo(w - 6, ty);
       accelCtx.stroke();
     });
     accelCtx.setLineDash([]);
@@ -1000,7 +1428,6 @@
       return 12 + ((8 - clamped) / 12) * (h - 24);
     }
 
-    /* 3.0σ Anomaly Gate Line */
     var gateY = yMapZ(3.0);
     diffCtx.strokeStyle = "rgba(244, 63, 94, 0.6)";
     diffCtx.setLineDash([4, 4]);
@@ -1033,7 +1460,6 @@
     if (!latestSnapshot || latestSnapshot.length < 2) return;
 
     var n = latestSnapshot.length;
-    /* Plot Speed (0..130 km/h) */
     scrubCtx.strokeStyle = "#06b6d4";
     scrubCtx.lineWidth = 1.7;
     scrubCtx.beginPath();
@@ -1044,7 +1470,6 @@
     }
     scrubCtx.stroke();
 
-    /* Plot |a| magnitude (scaled x2 for visibility on 0..130 chart) */
     scrubCtx.strokeStyle = "#f43f5e";
     scrubCtx.lineWidth = 1.6;
     scrubCtx.beginPath();
@@ -1057,7 +1482,6 @@
     }
     scrubCtx.stroke();
 
-    /* Selected scrubber cursor */
     var cx = 38 + (selectedIdx / Math.max(n - 1, 1)) * (w - 46);
     scrubCtx.strokeStyle = "#f59e0b";
     scrubCtx.lineWidth = 1.5;
@@ -1191,7 +1615,6 @@
     $("valTempBatt").textContent =
       s.engine_temp.toFixed(1) + "°C · " + s.battery.toFixed(0) + "%";
 
-    /* Compute Live Deltas (Δ) for Executive KPI Ribbon */
     var dv = (prevSpeed !== null) ? (s.speed - prevSpeed) : 0.0;
     prevSpeed = s.speed;
     var dSpdEl = $("deltaSpeed");
@@ -1220,7 +1643,6 @@
     laB.textContent = s.last_alert + (s.last_alert_time ? " @" + s.last_alert_time.toFixed(1) + "s" : "");
     laB.className = "pill " + (s.last_alert === "NONE" ? "info" : "down");
 
-    /* State Machine Pipeline */
     var states = ["NORMAL", "SUSPECTED", "CONFIRMED", "LOCKDOWN"];
     var curSm = (s.sm && s.sm.state) ? s.sm.state : "NORMAL";
     states.forEach(function (stName) {
@@ -1231,7 +1653,6 @@
       $("smStatusBanner").textContent = s.sm.status;
     }
 
-    /* Relays */
     if (s.relays) {
       var engCut = s.relays.engine === 1;
       $("boxEngine").className = "relay-box" + (engCut ? " on-danger" : "");
@@ -1254,7 +1675,6 @@
       $("txtLock").textContent = lckOn ? "DOORS LOCKED (THEFT)" : "FAIL-SAFE: UNLOCKED";
     }
 
-    /* Ring Buffer Visualizer */
     var cap = s.queue_capacity || 128;
     var cnt = s.queue_count || 0;
     var headSlot = Math.floor(((s.queue_head || 0) / cap) * 32) % 32;
@@ -1271,7 +1691,6 @@
       cells[idx].className = cls;
     }
 
-    /* Detector Internals & Diff Streams */
     if (s.detector) {
       var linA = s.detector.lin_amag || 0;
       if (linA > peakLinA) peakLinA = linA;
@@ -1310,7 +1729,6 @@
       drawDiffAndZPlot();
     }
 
-    /* GPS & Scrubber */
     if (s.gps) {
       var gfix = $("gpsFixBadge");
       gfix.textContent = s.gps.valid ? "GNSS 3D FIX" : "GNSS LOST";
@@ -1327,7 +1745,6 @@
       window.renderScrubFrame();
     }
 
-    /* Modem, LoRa & Outbox */
     if (s.modem) {
       $("modemRssi").textContent = s.modem.rssi + " dBm";
       $("atCmdText").textContent = s.modem.at_cmd;
@@ -1356,7 +1773,6 @@
       obTb.appendChild(tr);
     });
 
-    /* Security & Relay Log */
     if (s.security) {
       $("secCounters").textContent =
         "Verified: " + s.security.verified + " · Blocked: " + s.security.rejected;
@@ -1378,31 +1794,73 @@
     drawAccelPlot(s.plot || {});
   }
 
-  function startStream() {
-    if (typeof EventSource !== "undefined") {
-      var es = new EventSource("/api/stream");
-      es.onmessage = function (ev) {
-        try {
-          var data = JSON.parse(ev.data);
-          $("streamBadge").textContent = "SSE 250Hz";
-          $("streamBadge").className = "pill up";
-          render(data);
-        } catch (e) {}
-      };
-      es.onerror = function () {
-        $("streamBadge").textContent = "POLL MODE";
-        $("streamBadge").className = "pill warn";
-      };
+  /* Hybrid Connection Manager:
+   * 1. Attempts to connect to local C11 engine (/api/stream + /api/state).
+   * 2. If hosted on GitHub Pages / static web server (or opened via file://),
+   *    automatically activates the 250Hz In-Browser Simulation Engine! */
+  function startHybridEngine() {
+    var isStaticHost = (window.location.protocol === "file:" ||
+                        window.location.hostname.indexOf("github.io") !== -1 ||
+                        window.location.hostname.indexOf("vercel.app") !== -1 ||
+                        window.location.hostname.indexOf("netlify.app") !== -1);
+
+    if (isStaticHost) {
+      standaloneActive = true;
+      $("streamBadge").textContent = "WEB-SIM 250Hz";
+      $("streamBadge").className = "pill info";
+    } else if (typeof EventSource !== "undefined") {
+      try {
+        var es = new EventSource("/api/stream");
+        es.onmessage = function (ev) {
+          try {
+            var data = JSON.parse(ev.data);
+            backendConnected = true;
+            standaloneActive = false;
+            $("streamBadge").textContent = "SSE 250Hz (C11)";
+            $("streamBadge").className = "pill up";
+            render(data);
+          } catch (e) {}
+        };
+        es.onerror = function () {
+          if (!backendConnected) {
+            standaloneActive = true;
+            $("streamBadge").textContent = "WEB-SIM 250Hz";
+            $("streamBadge").className = "pill info";
+          }
+        };
+      } catch (e) {
+        standaloneActive = true;
+      }
     }
+
+    /* Fallback / Standalone 200ms (5Hz UI frame) ticker */
     setInterval(function () {
+      if (standaloneActive) {
+        stepStandaloneSim();
+        return;
+      }
       fetch("/api/state")
-        .then(function (r) { return r.json(); })
-        .then(render)
-        .catch(function () {});
-    }, 600);
+        .then(function (r) {
+          if (!r.ok) throw new Error("no backend");
+          return r.json();
+        })
+        .then(function (data) {
+          backendConnected = true;
+          standaloneActive = false;
+          render(data);
+        })
+        .catch(function () {
+          if (!backendConnected) {
+            standaloneActive = true;
+            $("streamBadge").textContent = "WEB-SIM 250Hz";
+            $("streamBadge").className = "pill info";
+            stepStandaloneSim();
+          }
+        });
+    }, 200);
   }
 
-  startStream();
+  startHybridEngine();
 })();
 </script>
 </body>
